@@ -7,14 +7,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-   <div class="stars" id="stars"></div>
-    
-    <!-- Падающие лепестки -->
-    <div id="petals"></div>
-
     <section class="intro">
         <h1>Привет.</h1>
-        <div class="scroll-down"><i class="fas fa-chevron-down"></i></div>
+        <button class="scroll-down" aria-label="Листай вниз">
+            <span aria-hidden="true">⬇️</span>
+        </button>
     </section>
 
     <section class="letter">
@@ -49,11 +46,6 @@
 
         <p class="indent">Я буду там, где мой путь. Не жду. Но помню.</p>
     </section>
-
-    <!-- Кнопка возврата наверх -->
-    <div class="back-to-top" id="backToTop">
-        <i class="fas fa-arrow-up"></i>
-    </div>
 
     <script src="script.js"></script>
 </body>
