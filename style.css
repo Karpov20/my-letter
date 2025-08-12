@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    color: white;
+    line-height: 1.6;
+    background: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #53354a);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+}
+
+@keyframes gradientBG {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
+
+.content {
+    max-width: 900px;
+    margin: auto;
+    padding: 30px;
+}
+
+h1 {
+    text-align: center;
+    font-family: 'Marck Script', cursive;
+    font-size: 3em;
+    margin-bottom: 20px;
+}
+
+.letter {
+    font-size: 1.2em;
+}
+
+.indent {
+    text-indent: 2em;
+}
+
+.underline {
+    text-decoration: underline;
+}
+
+.empty-line {
+    height: 1.5em;
+}
+
+p {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease-out;
+}
+
+p.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Эффект сердечек */
+.heart {
+    position: fixed;
+    color: pink;
+    font-size: 20px;
+    animation: floatUp 2s ease forwards;
+    pointer-events: none;
+}
+
+@keyframes floatUp {
+    0% {transform: translateY(0) scale(1);}
+    100% {transform: translateY(-100px) scale(1.5); opacity: 0;}
+}
