@@ -8,6 +8,7 @@ body {
     background: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #53354a);
     background-size: 400% 400%;
     animation: gradientBG 15s ease infinite;
+    min-height: 100vh;
 }
 
 @keyframes gradientBG {
@@ -17,7 +18,7 @@ body {
 }
 
 section {
-    max-width: 900px;
+    max-width: 800px;
     margin: auto;
     padding: 30px;
 }
@@ -46,6 +47,12 @@ h1 {
     bottom: 40px;
     animation: bounce 1s infinite alternate;
     opacity: 0.8;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.scroll-down:hover {
+    opacity: 1;
 }
 
 @keyframes bounce {
@@ -53,10 +60,16 @@ h1 {
     to { transform: translateY(10px); }
 }
 
+.letter {
+    font-size: 1.1em;
+    text-align: justify;
+}
+
 .letter p {
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 1s ease, transform 1s ease;
+    margin-bottom: 1.5em;
 }
 
 .letter p.visible {
@@ -70,18 +83,36 @@ h1 {
 
 .underline {
     text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.7);
 }
 
 /* Сердечки */
 .heart {
     position: fixed;
-    color: pink;
-    font-size: 20px;
+    color: #ff6b6b;
+    font-size: 24px;
     animation: floatUp 2s ease forwards;
     pointer-events: none;
+    z-index: 1000;
 }
 
 @keyframes floatUp {
-    0% {transform: translateY(0) scale(1);}
+    0% {transform: translateY(0) scale(1); opacity: 1;}
     100% {transform: translateY(-100px) scale(1.5); opacity: 0;}
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    section {
+        padding: 20px;
+        max-width: 90%;
+    }
+    
+    h1 {
+        font-size: 2.5em;
+    }
+    
+    .letter {
+        font-size: 1em;
+    }
 }
