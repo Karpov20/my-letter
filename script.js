@@ -1,64 +1,55 @@
-// Создаем звёздное небо
-        function createStars() {
-            const starsContainer = document.getElementById('stars');
-            const starsCount = 200;
-            
-            for (let i = 0; i < starsCount; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                
-                // Случайные параметры для звезды
-                const size = Math.random() * 2;
-                const posX = Math.random() * 100;
-                const posY = Math.random() * 100;
-                const opacity = 0.1 + Math.random() * 0.9;
-                const duration = 3 + Math.random() * 7;
-                const delay = Math.random() * 5;
-                
-                star.style.width = `${size}px`;
-                star.style.height = `${size}px`;
-                star.style.left = `${posX}%`;
-                star.style.top = `${posY}%`;
-                star.style.opacity = opacity;
-                star.style.animationDuration = `${duration}s`;
-                star.style.animationDelay = `${delay}s`;
-                
-                starsContainer.appendChild(star);
-            }
-        }
+// Звёздное небо
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
 
-        // Создаем падающие лепестки
-        function createPetals() {
-            const petalsContainer = document.getElementById('petals');
-            const petalCount = 15;
-            const petalTypes = 5;
-            
-            for (let i = 0; i < petalCount; i++) {
-                const petal = document.createElement('div');
-                petal.className = 'petal';
-                
-                // Случайные параметры для лепестка
-                const size = 20 + Math.random() * 30;
-                const posX = Math.random() * 100;
-                const duration = 10 + Math.random() * 20;
-                const delay = Math.random() * 15;
-                const rotation = Math.random() * 360;
-                const petalType = Math.floor(Math.random() * petalTypes) + 1;
-                const randomX = Math.random() * 2 - 1; // От -1 до 1
-                
-                petal.style.width = `${size}px`;
-                petal.style.height = `${size}px`;
-                petal.style.left = `${posX}%`;
-                petal.style.backgroundImage = `url('https://www.transparenttextures.com/patterns/soft-circle-pink.png')`;
-                petal.style.animationDuration = `${duration}s`;
-                petal.style.animationDelay = `${delay}s`;
-                petal.style.setProperty('--random-x', randomX);
-                
-                petalsContainer.appendChild(petal);
-            }
-        }
+let stars = [];
+let w, h;
 
-        // Плавное появление текста при скролле
+function initStars() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    stars = [];
+    for (let i = 0; i < 200; i++) {
+        stars.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            r: Math.random() * 1.5,
+            d: Math.random() * 0.5
+        });
+    }
+}
+
+function drawStars() {
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "white";
+    stars.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    moveStars();
+}
+
+function moveStars() {
+    stars.forEach(s => {
+        s.y += s.d;
+        if (s.y > h) {
+            s.x = Math.random() * w;
+            s.y = 0;
+        }
+    });
+}
+
+function animateStars() {
+    drawStars();
+    requestAnimationFrame(animateStars);
+}
+
+window.addEventListener('resize', initStars);
+initStars();
+animateStars();
+
+// Плавное появление карточек
 const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -67,8 +58,8 @@ const observer = new IntersectionObserver(entries => {
     });
 }, { threshold: 0.2 });
 
-document.querySelectorAll('.letter p').forEach(p => {
-    observer.observe(p);
+document.querySelectorAll('.card').forEach(card => {
+    observer.observe(card);
 });
 
 // Прячем стрелку при скролле
@@ -78,14 +69,10 @@ scrollDown.addEventListener('click', () => {
 });
 
 window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-        scrollDown.style.display = 'none';
-    } else {
-        scrollDown.style.display = 'block';
-    }
+    scrollDown.style.display = window.scrollY > 50 ? 'none' : 'block';
 });
 
-// Эффект сердечек при клике
+// Сердечки при клике
 document.addEventListener('click', (e) => {
     const heart = document.createElement('div');
     heart.textContent = '❤️';
