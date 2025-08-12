@@ -1,25 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto:wght@300;400&display=swap');
 
-body {
+html, body {
     margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden;
     font-family: 'Roboto', sans-serif;
     color: white;
-    line-height: 1.6;
-    background: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #53354a);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
 }
 
-@keyframes gradientBG {
-    0% {background-position: 0% 50%;}
-    50% {background-position: 100% 50%;}
-    100% {background-position: 0% 50%;}
-}
-
-section {
-    max-width: 900px;
-    margin: auto;
-    padding: 30px;
+/* Звёздное небо */
+#stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: black;
 }
 
 .intro {
@@ -34,7 +32,7 @@ section {
 
 h1 {
     font-family: 'Marck Script', cursive;
-    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-size: clamp(3rem, 6vw, 5rem);
     margin-bottom: 20px;
     opacity: 0;
     transform: translateY(-20px);
@@ -74,27 +72,42 @@ h1 {
     to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-.letter p {
+/* Карточки текста */
+.letter {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 40px 20px;
+    max-width: 900px;
+    margin: auto;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(5px);
+    border-radius: 15px;
+    padding: 20px;
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 1s ease, transform 1s ease;
-    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
-.letter p.visible {
+.card.visible {
     opacity: 1;
     transform: translateY(0);
 }
 
-.indent {
-    text-indent: 2em;
+.card p {
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    margin: 0;
 }
 
 .underline {
     text-decoration: underline;
 }
 
-/* Сердечки при клике */
+/* Сердечки */
 .heart {
     position: fixed;
     color: pink;
@@ -108,11 +121,7 @@ h1 {
     100% {transform: translateY(-100px) scale(1.5); opacity: 0;}
 }
 
-/* Мобильная адаптация */
 @media (max-width: 600px) {
-    section {
-        padding: 20px;
-    }
     .scroll-down {
         font-size: 2rem;
         bottom: 20px;
