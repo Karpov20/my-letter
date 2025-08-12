@@ -58,88 +58,40 @@
             }
         }
 
-        // Эффект появления текста при скролле
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
+        // Плавное появление текста при скролле
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+        }
+    });
+}, { threshold: 0.2 });
 
-        document.querySelectorAll('.letter p').forEach(p => {
-            observer.observe(p);
-        });
+document.querySelectorAll('.letter p').forEach(p => {
+    observer.observe(p);
+});
 
-        // Прячем стрелку при скролле
-        const scrollDown = document.querySelector('.scroll-down');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                scrollDown.style.opacity = '0';
-                setTimeout(() => scrollDown.style.display = 'none', 300);
-            } else {
-                scrollDown.style.display = 'block';
-                setTimeout(() => scrollDown.style.opacity = '1', 10);
-            }
-            
-            // Показываем/скрываем кнопку "наверх"
-            const backToTop = document.getElementById('backToTop');
-            if (window.scrollY > 300) {
-                backToTop.classList.add('visible');
-            } else {
-                backToTop.classList.remove('visible');
-            }
-        });
+// Прячем стрелку при скролле
+const scrollDown = document.querySelector('.scroll-down');
+scrollDown.addEventListener('click', () => {
+    window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+});
 
-        // Плавный скролл при клике на стрелку вниз
-        scrollDown.addEventListener('click', () => {
-            window.scrollTo({
-                top: document.querySelector('.letter').offsetTop - 50,
-                behavior: 'smooth'
-            });
-        });
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) {
+        scrollDown.style.display = 'none';
+    } else {
+        scrollDown.style.display = 'block';
+    }
+});
 
-        // Плавный скролл при клике на кнопку "наверх"
-        document.getElementById('backToTop').addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-
-        // Эффект чернильных клякс при клике
-        document.addEventListener('click', (e) => {
-            const inkBlot = document.createElement('div');
-            inkBlot.className = 'ink-blot';
-            
-            // Случайные параметры для кляксы
-            const size = 50 + Math.random() * 100;
-            const colors = ['#e94584', '#0f3460', '#53354a', '#ffc107'];
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            
-            inkBlot.style.width = `${size}px`;
-            inkBlot.style.height = `${size}px`;
-            inkBlot.style.backgroundColor = color;
-            inkBlot.style.borderRadius = `${50 + Math.random() * 50}%`;
-            inkBlot.style.left = `${e.clientX - size/2}px`;
-            inkBlot.style.top = `${e.clientY - size/2}px`;
-            
-            document.body.appendChild(inkBlot);
-            
-            // Удаляем кляксу через некоторое время
-            setTimeout(() => {
-                inkBlot.style.opacity = '0';
-                setTimeout(() => inkBlot.remove(), 1000);
-            }, 3000);
-        });
-
-        // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', () => {
-            createStars();
-            createPetals();
-            
-            // Плавное появление стрелки вниз
-            setTimeout(() => {
-                scrollDown.style.opacity = '1';
-            }, 1500);
-        });
+// Эффект сердечек при клике
+document.addEventListener('click', (e) => {
+    const heart = document.createElement('div');
+    heart.textContent = '❤️';
+    heart.className = 'heart';
+    heart.style.left = e.clientX + 'px';
+    heart.style.top = e.clientY + 'px';
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 2000);
+});
