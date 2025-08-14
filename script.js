@@ -1,404 +1,230 @@
-// =======================
-//  ЗВЁЗДНОЕ НЕБО
-// =======================
+// ======================= ЗВЁЗДНОЕ НЕБО =======================
 (() => {
-  const canvas = document.getElementById('stars');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-
-  let stars = [];
-  let w, h;
-
-  function initStars() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-    stars = [];
-    for (let i = 0; i < 200; i++) {
-      stars.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        r: Math.random() * 1.5,
-        d: Math.random() * 0.5
-      });
-    }
+  const canvas = document.getElementById('stars'); if (!canvas) return;
+  const ctx = canvas.getContext('2d'); let stars = []; let w, h;
+  function initStars(){ w = canvas.width = innerWidth; h = canvas.height = innerHeight;
+    stars = Array.from({length:200}, ()=>({ x:Math.random()*w, y:Math.random()*h, r:Math.random()*1.5, d:Math.random()*0.5 }));
   }
-
-  function drawStars() {
-    ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "white";
-    stars.forEach(s => {
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    moveStars();
+  function draw(){ ctx.clearRect(0,0,w,h); ctx.fillStyle="white";
+    for (const s of stars){ ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill(); s.y += s.d; if (s.y>h){ s.x=Math.random()*w; s.y=0; } }
+    requestAnimationFrame(draw);
   }
+  addEventListener('resize', initStars); initStars(); draw();
+})();
 
-  function moveStars() {
-    stars.forEach(s => {
-      s.y += s.d;
-      if (s.y > h) {
-        s.x = Math.random() * w;
-        s.y = 0;
+// =================== КАРТОЧКИ + запуск музыки =================
+(() => {
+  const cards = document.querySelectorAll('.card'); if (!cards.length) return;
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if (e.isIntersecting){
+        e.target.classList.add('visible');
+        // подстраховка: как только увидели первую карточку — снимаем mute
+        if (window.unlockAudio) window.unlockAudio();
       }
     });
-  }
-
-  function animateStars() {
-    drawStars();
-    requestAnimationFrame(animateStars);
-  }
-
-  window.addEventListener('resize', initStars);
-  initStars();
-  animateStars();
+  }, { threshold:0.2 });
+  cards.forEach(c=>io.observe(c));
 })();
 
-
-// =======================
-//  ПОЯВЛЕНИЕ КАРТОЧЕК
-// =======================
+// ==================== КНОПКА СКРОЛЛА ВНИЗ ====================
 (() => {
-  const cards = document.querySelectorAll('.card');
-  if (!cards.length) return;
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) entry.target.classList.add('visible');
-    });
-  }, { threshold: 0.2 });
-
-  cards.forEach(card => observer.observe(card));
+  const btn = document.querySelector('.scroll-down'); if (!btn) return;
+  btn.addEventListener('click', ()=>{ if (window.unlockAudio) window.unlockAudio(); scrollTo({top:innerHeight, behavior:'smooth'}); });
+  addEventListener('scroll', ()=>{ btn.style.display = scrollY>50 ? 'none' : 'block'; }, { passive:true });
 })();
 
-
-// =======================
-//  КНОПКА СКРОЛЛА ВНИЗ
-// =======================
-(() => {
-  const scrollDown = document.querySelector('.scroll-down');
-  if (!scrollDown) return;
-
-  scrollDown.addEventListener('click', () => {
-    // если функция разблокировки доступна — дернем
-    if (window.unlockAudio) window.unlockAudio();
-    window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
-  });
-
-  window.addEventListener('scroll', () => {
-    scrollDown.style.display = window.scrollY > 50 ? 'none' : 'block';
-  }, { passive: true });
-})();
-
-
-// =======================
-//  СЕРДЕЧКИ ПРИ КЛИКЕ
-// =======================
+// ===================== СЕРДЕЧКИ ПРИ КЛИКЕ ====================
 (() => {
   document.addEventListener('click', (e) => {
-    // не рисуем сердечко поверх кнопок и диалогов
-    if ((e.target && (e.target.closest('#music-controls') ||
-                      e.target.closest('.memory-dialog') ||
-                      e.target.closest('#answers-panel')))) return;
-
+    if (e.target.closest('#music-controls, .memory-dialog, #answers-panel, .fab-dock')) return;
     const heart = document.createElement('div');
-    heart.textContent = '❤️';
-    heart.className = 'heart';
-    heart.style.left = e.clientX + 'px';
-    heart.style.top = e.clientY + 'px';
-    document.body.appendChild(heart);
-    setTimeout(() => heart.remove(), 2000);
+    heart.textContent = '❤️'; heart.className = 'heart';
+    heart.style.left = e.clientX + 'px'; heart.style.top = e.clientY + 'px';
+    document.body.appendChild(heart); setTimeout(()=>heart.remove(), 2000);
   });
 })();
 
-
-// =======================
-//  МУЗЫКА (мобилки + десктоп)
-// =======================
+// =================== МУЗЫКА (мобилки + десктоп) =================
 (() => {
   const audio = document.getElementById('background-music');
   const playBtn = document.getElementById('play-music');
   const pauseBtn = document.getElementById('pause-music');
-  const volumeSlider = document.getElementById('volume-slider');
-
+  const volume = document.getElementById('volume-slider');
   if (!audio) return;
 
-  let desiredVolume = parseFloat(volumeSlider?.value || '0.7');
-  let fadeInterval = null;
-  let unlocked = false;
+  let desired = parseFloat(volume?.value || '0.7');
+  let fade = null; let unlocked = false;
 
-  audio.volume = 0;
-  audio.muted = true;
-  audio.play().catch(() => {});
+  audio.volume = 0; audio.muted = true;
+  audio.play().catch(()=>{});
 
-  function removeUnlockListeners() {
+  function removeUnlock(){
     ['pointerdown','pointerup','keydown','touchstart','touchend','touchmove','wheel','scroll']
-      .forEach(ev => window.removeEventListener(ev, unlockAudio, { capture:false }));
+      .forEach(ev=> removeEventListener(ev, unlockAudio));
   }
 
-  function unlockAudio() {
-    if (unlocked) return;
-    unlocked = true;
-
-    audio.muted = false;
-    audio.play().catch(()=>{});
-
-    clearInterval(fadeInterval);
-    const step = 0.06;
-    fadeInterval = setInterval(() => {
-      audio.volume = Math.min(desiredVolume, (audio.volume || 0) + step);
-      if (audio.volume >= desiredVolume) clearInterval(fadeInterval);
+  function unlockAudio(){
+    if (unlocked) return; unlocked = true;
+    audio.muted = false; audio.play().catch(()=>{});
+    clearInterval(fade);
+    fade = setInterval(()=>{
+      audio.volume = Math.min(desired, (audio.volume || 0)+0.06);
+      if (audio.volume >= desired) clearInterval(fade);
     }, 90);
-
-    if (playBtn && pauseBtn) { playBtn.style.display='none'; pauseBtn.style.display='flex'; }
-
-    removeUnlockListeners();
+    if (playBtn && pauseBtn){ playBtn.style.display='none'; pauseBtn.style.display='flex'; }
+    removeUnlock();
   }
-  // сделаем доступной глобально (для кнопки-стрелки и других мест)
   window.unlockAudio = unlockAudio;
 
-  // больше жестов, которые точно считаются «взаимодействием»
-  window.addEventListener('pointerdown', unlockAudio, { once:true, passive:true });
-  window.addEventListener('pointerup',   unlockAudio, { once:true, passive:true });
-  window.addEventListener('keydown',     unlockAudio, { once:true });
-  window.addEventListener('touchstart',  unlockAudio, { once:true, passive:true });
-  window.addEventListener('touchend',    unlockAudio, { once:true, passive:true });
-  window.addEventListener('touchmove',   unlockAudio, { once:true, passive:true });
-  window.addEventListener('wheel',       unlockAudio, { once:true, passive:true });
-  window.addEventListener('scroll',      unlockAudio, { once:true, passive:true });
+  addEventListener('pointerdown', unlockAudio, { once:true, passive:true });
+  addEventListener('pointerup',   unlockAudio, { once:true, passive:true });
+  addEventListener('keydown',     unlockAudio, { once:true });
+  addEventListener('touchstart',  unlockAudio, { once:true, passive:true });
+  addEventListener('touchend',    unlockAudio, { once:true, passive:true });
+  addEventListener('touchmove',   unlockAudio, { once:true, passive:true });
+  addEventListener('wheel',       unlockAudio, { once:true, passive:true });
+  addEventListener('scroll',      unlockAudio, { once:true, passive:true });
 
-  // … дальше ваш код play/pause/volume без изменений …
+  playBtn?.addEventListener('click', ()=>{ desired=parseFloat(volume?.value||'0.7'); unlockAudio(); audio.play().catch(()=>{}); });
+  pauseBtn?.addEventListener('click', ()=>{ audio.pause(); if (playBtn&&pauseBtn){ pauseBtn.style.display='none'; playBtn.style.display='flex'; } });
+  volume?.addEventListener('input', ()=>{ desired=parseFloat(volume.value); if (!audio.muted && !audio.paused) audio.volume = desired; });
+
+  document.addEventListener('visibilitychange', ()=>{ if (!document.hidden && unlocked && audio.paused) audio.play().catch(()=>{}); });
 })();
 
-  // кнопки
-  playBtn?.addEventListener('click', () => {
-    desiredVolume = parseFloat(volumeSlider?.value || '0.7');
-    unlockAudio();
-    audio.play().catch(()=>{});
-  });
-
-  pauseBtn?.addEventListener('click', () => {
-    audio.pause();
-    if (playBtn && pauseBtn) {
-      pauseBtn.style.display = 'none';
-      playBtn.style.display = 'flex';
-    }
-  });
-
-  // громкость
-  volumeSlider?.addEventListener('input', () => {
-    desiredVolume = parseFloat(volumeSlider.value);
-    if (!audio.muted && !audio.paused) audio.volume = desiredVolume;
-  });
-
-  // возврат во вкладку
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && unlocked && audio.paused) {
-      audio.play().catch(()=>{});
-    }
-  });
-})();
-
-
-// =======================
-//  МОДАЛКА "ОСТАВИТЬ ВОСПОМИНАНИЕ"
-// =======================
+// ========== МОДАЛКА «Оставить воспоминание» + localStorage ==========
 (() => {
-  const memoryFab = document.getElementById('memory-fab');
-  const memoryBackdrop = document.getElementById('memory-backdrop');
-  const memoryDialog = document.getElementById('memory-dialog');
-  const memoryText = document.getElementById('memory-text');
-  const memorySave = document.getElementById('memory-save');
-  const memoryCancel = document.getElementById('memory-cancel');
+  const fab = document.getElementById('memory-fab');
+  const backdrop = document.getElementById('memory-backdrop');
+  const dialog = document.getElementById('memory-dialog');
+  const text = document.getElementById('memory-text');
+  const save = document.getElementById('memory-save');
+  const cancel = document.getElementById('memory-cancel');
   const toast = document.getElementById('toast');
 
-  function openMemoryDialog() {
-    if (!memoryBackdrop || !memoryDialog) return;
-    memoryBackdrop.hidden = false;
-    memoryDialog.hidden = false;
-    setTimeout(() => memoryText?.focus(), 30);
-    document.body.style.overflow = 'hidden';
+  function open(){ if (!backdrop||!dialog) return; backdrop.hidden=false; dialog.hidden=false; setTimeout(()=>text?.focus(),30); document.body.style.overflow='hidden'; }
+  function close(){ if (!backdrop||!dialog) return; backdrop.hidden=true; dialog.hidden=true; document.body.style.overflow=''; if (text) text.value=''; }
+  function showToast(msg='Воспоминание сохранено'){ if (!toast) return; toast.textContent=msg; toast.hidden=false; requestAnimationFrame(()=>{ toast.classList.add('show'); setTimeout(()=>{ toast.classList.remove('show'); setTimeout(()=>toast.hidden=true,200); },1800); }); }
+  function read(){ try { return JSON.parse(localStorage.getItem('memories')||'[]'); } catch { return []; } }
+  function write(arr){ try { localStorage.setItem('memories', JSON.stringify(arr)); } catch {} }
+
+  function saveMem(){
+    const val=(text?.value||'').trim(); if (!val){ showToast('Пустое воспоминание не сохранено'); return; }
+    const arr=read(); arr.push({ text:val, ts:Date.now() }); write(arr); close(); showToast('Воспоминание сохранено');
+    if (!document.getElementById('answers-panel')?.hidden && window.renderMemories) window.renderMemories();
   }
 
-  function closeMemoryDialog() {
-    if (!memoryBackdrop || !memoryDialog) return;
-    memoryBackdrop.hidden = true;
-    memoryDialog.hidden = true;
-    document.body.style.overflow = '';
-    if (memoryText) memoryText.value = '';
-  }
+  document.addEventListener('DOMContentLoaded', ()=>{ if (backdrop) backdrop.hidden=true; if (dialog) dialog.hidden=true; document.body.style.overflow=''; });
 
-  function showToast(msg = 'Воспоминание сохранено') {
-    if (!toast) return;
-    toast.textContent = msg;
-    toast.hidden = false;
-    requestAnimationFrame(() => {
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => (toast.hidden = true), 200);
-      }, 1800);
-    });
-  }
+  fab?.addEventListener('click', open);
+  backdrop?.addEventListener('click', close);
+  cancel?.addEventListener('click', close);
+  save?.addEventListener('click', saveMem);
+  document.addEventListener('keydown', e=>{ if (!dialog || dialog.hidden) return; if (e.key==='Escape') close(); if ((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='enter') saveMem(); });
 
-  function readMemories(){ try {return JSON.parse(localStorage.getItem('memories') || '[]');} catch {return [];} }
-  function writeMemories(arr){ try { localStorage.setItem('memories', JSON.stringify(arr)); } catch {} }
-
-  function saveMemory() {
-    const text = (memoryText?.value || '').trim();
-    if (!text) { showToast('Пустое воспоминание не сохранено'); return; }
-    const current = readMemories();
-    current.push({ text, ts: Date.now() });
-    writeMemories(current);
-    closeMemoryDialog();
-    showToast('Воспоминание сохранено');
-    // если панель ответов открыта — перерисуем (функция объявлена ниже, может быть undefined)
-    if (window.renderMemories && !document.getElementById('answers-panel')?.hidden) {
-      window.renderMemories();
-    }
-  }
-
-  // гарантированно закрываем модалку при загрузке, чтобы не блокировала скролл
-  document.addEventListener('DOMContentLoaded', () => {
-    if (memoryBackdrop) memoryBackdrop.hidden = true;
-    if (memoryDialog) memoryDialog.hidden = true;
-    document.body.style.overflow = '';
-  });
-
-  memoryFab?.addEventListener('click', openMemoryDialog);
-  memoryBackdrop?.addEventListener('click', closeMemoryDialog);
-  memoryCancel?.addEventListener('click', closeMemoryDialog);
-  memorySave?.addEventListener('click', saveMemory);
-
-  document.addEventListener('keydown', (e) => {
-    if (!memoryDialog || memoryDialog.hidden) return;
-    if (e.key === 'Escape') closeMemoryDialog();
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'enter') saveMemory();
-  });
-
-  // Экспортируем некоторые функции для панели ответов
-  window.__memUtils = { readMemories, writeMemories, showToast };
+  window.__memUtils = { read, write, showToast };
 })();
 
-
-// =======================
-//  ПАНЕЛЬ "ОТВЕТЫ" (список сохранённых)
-// =======================
+// ===================== ПАНЕЛЬ «Ответы» (локальные) =================
 (() => {
-  const answersFab    = document.getElementById('answers-fab');
-  const answersPanel  = document.getElementById('answers-panel');
-  const answersClose  = document.getElementById('answers-close');
-  const answersClear  = document.getElementById('answers-clear');
-  const answersExport = document.getElementById('answers-export');
-  const memoriesList  = document.getElementById('memories-list');
+  const dockBtn  = document.getElementById('answers-fab');
+  const panel    = document.createElement('aside');
+  panel.id='answers-panel';
+  panel.className='answers-panel';
+  panel.hidden = true;
+  panel.innerHTML = `
+    <div class="answers-header">
+      <h3>Твои воспоминания</h3>
+      <button id="answers-close" class="btn btn-secondary">Закрыть</button>
+    </div>
+    <ul id="memories-list" class="memories-list"></ul>
+    <div class="answers-actions">
+      <button id="answers-clear" class="btn btn-secondary">Очистить всё</button>
+      <button id="answers-export" class="btn btn-primary">Экспорт .txt</button>
+    </div>`;
+  document.body.appendChild(panel);
 
-  if (!answersPanel) return;
+  const { read, write, showToast } = window.__memUtils || {};
+  const list = panel.querySelector('#memories-list');
+  const closeBtn = panel.querySelector('#answers-close');
+  const clearBtn = panel.querySelector('#answers-clear');
+  const exportBtn= panel.querySelector('#answers-export');
 
-  const { readMemories, writeMemories, showToast } = window.__memUtils || {};
+  function fmt(ts){ return new Date(ts).toLocaleString(); }
 
-  function fmtDate(ts){ return new Date(ts).toLocaleString(); }
-
-  function renderMemories() {
-    if (!memoriesList || !readMemories) return;
-    const items = readMemories().slice().reverse();
-    memoriesList.innerHTML = '';
-    if (!items.length){
-      const li = document.createElement('li');
-      li.textContent = 'Пока пусто. Оставь первое воспоминание.';
-      memoriesList.appendChild(li);
-      return;
-    }
+  function render(){
+    if (!list || !read) return;
+    const items = read().slice().reverse();
+    list.innerHTML='';
+    if (!items.length){ const li=document.createElement('li'); li.textContent='Пока пусто. Оставь первое воспоминание.'; list.appendChild(li); return; }
     for (const m of items){
-      const li = document.createElement('li');
-      const t  = document.createElement('time'); t.textContent = fmtDate(m.ts);
-      const p  = document.createElement('p');    p.textContent = m.text;
-
-      const row = document.createElement('div'); row.style.display='flex'; row.style.gap='8px';
-      const del = document.createElement('button'); del.className='btn btn-secondary'; del.textContent='Удалить';
-      del.addEventListener('click', () => {
-        const all = readMemories();
-        const idx = all.findIndex(x => x.ts === m.ts && x.text === m.text);
-        if (idx > -1){ all.splice(idx,1); writeMemories(all); renderMemories(); showToast?.('Удалено'); }
+      const li=document.createElement('li'); li.className='entry';
+      li.innerHTML=`<time>${fmt(m.ts)}</time><p>${m.text}</p>`;
+      const del=document.createElement('button'); del.className='btn btn-secondary'; del.textContent='Удалить';
+      del.addEventListener('click', ()=>{
+        const all=read(); const i=all.findIndex(x=>x.ts===m.ts && x.text===m.text);
+        if (i>-1){ all.splice(i,1); write(all); render(); showToast?.('Удалено'); }
       });
-
-      row.appendChild(del);
-      li.appendChild(t); li.appendChild(p); li.appendChild(row);
-      memoriesList.appendChild(li);
+      li.appendChild(del); list.appendChild(li);
     }
   }
-  // сделаем доступной из saveMemory()
-  window.renderMemories = renderMemories;
+  window.renderMemories = render;
 
-  function openAnswers(){
-    answersPanel.hidden = false;
-    requestAnimationFrame(()=>answersPanel.classList.add('open'));
-  }
-  function closeAnswers(){
-    answersPanel.classList.remove('open');
-    setTimeout(()=> answersPanel.hidden = true, 250);
-  }
+  function open(){ panel.hidden=false; requestAnimationFrame(()=>panel.classList.add('open')); }
+  function close(){ panel.classList.remove('open'); setTimeout(()=>panel.hidden=true,250); }
 
-  answersFab?.addEventListener('click', () => { renderMemories(); openAnswers(); });
-  answersClose?.addEventListener('click', closeAnswers);
-  answersPanel.addEventListener('click', (e) => {
-    if (e.target === answersPanel) closeAnswers();
-  });
+  dockBtn?.addEventListener('click', ()=>{ render(); open(); });
+  closeBtn?.addEventListener('click', close);
+  panel.addEventListener('click', e=>{ if (e.target===panel) close(); });
 
-  answersClear?.addEventListener('click', () => {
-    if (!readMemories || !writeMemories) return;
-    if (confirm('Точно удалить все воспоминания?')) {
-      localStorage.removeItem('memories');
-      renderMemories();
-      showToast?.('Очищено');
-    }
-  });
-
-  answersExport?.addEventListener('click', () => {
-    if (!readMemories) return;
-    const items = readMemories();
+  clearBtn?.addEventListener('click', ()=>{ if (confirm('Точно удалить все воспоминания?')){ localStorage.removeItem('memories'); render(); showToast?.('Очищено'); } });
+  exportBtn?.addEventListener('click', ()=>{
+    const items = (window.__memUtils?.read()||[]);
     if (!items.length) return showToast?.('Нечего экспортировать');
-    const text = items.map(m => `[${fmtDate(m.ts)}]\n${m.text}\n`).join('\n');
-    const blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'memories.txt';
-    document.body.appendChild(a); a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
+    const txt = items.map(m=>`[${fmt(m.ts)}]\n${m.text}\n`).join('\n');
+    const blob = new Blob([txt], {type:'text/plain;charset=utf-8'});
+    const url=URL.createObjectURL(blob); const a=document.createElement('a');
+    a.href=url; a.download='memories.txt'; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },0);
   });
 })();
 
-
-// =======================
-//  СЕКРЕТНОЕ СООБЩЕНИЕ (в самом конце)
-// =======================
+// ====================== СЕКРЕТНОЕ СООБЩЕНИЕ =======================
 (() => {
-  const secret = document.getElementById('secret');
-  if (!secret) return;
+  const secret = document.getElementById('secret'); if (!secret) return;
+  if (localStorage.getItem('secretShown') === '1'){ secret.classList.add('visible'); return; }
+  const io = new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if (e.isIntersecting){ setTimeout(()=>secret.classList.add('visible'), 450); try{ localStorage.setItem('secretShown','1'); }catch{} io.disconnect(); } }); }, { threshold:0.6 });
+  io.observe(secret);
+})();
 
-  let secretShown = false;
+// ===================== ГОСТЕВАЯ (опционально) =====================
+(() => {
+  const url = window.PUBLIC_GUESTBOOK_CSV;
+  const wrap = document.getElementById('guestbook');
+  const list = document.getElementById('guestbook-entries');
+  if (!url || !wrap || !list) return; // выключено по умолчанию
 
-  function checkBottomReveal() {
-    if (secretShown) return;
-    const bottom = window.scrollY + window.innerHeight;
-    const docHeight = Math.max(
-      document.body.scrollHeight,
-      document.documentElement.scrollHeight
-    );
-    const threshold = 4; // пиксели до низа
-    if (bottom >= docHeight - threshold) {
-      secretShown = true;
-      setTimeout(() => secret.classList.add('visible'), 450); // мягкая задержка
-      try { localStorage.setItem('secretShown', '1'); } catch {}
-    }
-  }
+  // Показать раздел
+  wrap.hidden = false;
 
-  window.addEventListener('scroll', checkBottomReveal, { passive: true });
-  window.addEventListener('resize', checkBottomReveal);
-  document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('secretShown') === '1') {
-      secret.classList.add('visible');
-    } else {
-      checkBottomReveal();
-    }
-  });
+  fetch(url).then(r=>r.text()).then(csv=>{
+    const rows = csv.trim().split(/\r?\n/).map(line=>{
+      // очень простой CSV-парсер (без кавычек)
+      return line.split(',').map(c=>c.trim());
+    });
+    // предполагаем: первая строка — заголовки; ищем столбцы "Timestamp" и "Message"/"Ответ"
+    const head = rows.shift() || [];
+    const iTime = head.findIndex(h=>/time|время|timestamp/i.test(h));
+    const iText = head.findIndex(h=>/text|сообщ|message|ответ/i.test(h));
+    list.innerHTML='';
+    rows.reverse().forEach(r=>{
+      const when = iTime>-1 ? r[iTime] : '';
+      const msg  = iText>-1 ? r[iText] : r.join(' – ');
+      const div = document.createElement('div');
+      div.className='entry';
+      div.innerHTML = `<time>${when}</time><p>${msg}</p>`;
+      list.appendChild(div);
+    });
+  }).catch(()=>{ list.innerHTML = '<div class="entry">Не удалось загрузить гостевую ленту.</div>'; });
 })();
