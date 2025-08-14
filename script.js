@@ -80,6 +80,8 @@
   if (!scrollDown) return;
 
   scrollDown.addEventListener('click', () => {
+    // если функция разблокировки доступна — дернем
+    if (window.unlockAudio) window.unlockAudio();
     window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
   });
 
@@ -121,22 +123,17 @@
 
   if (!audio) return;
 
-  let desiredVolume = parseFloat(volumeSlider?.value || '0.7'); // ~70%
+  let desiredVolume = parseFloat(volumeSlider?.value || '0.7');
   let fadeInterval = null;
   let unlocked = false;
 
-  // стартуем без звука — единственный надёжный автоплей
   audio.volume = 0;
   audio.muted = true;
-  audio.play().catch(() => {/* ждём жест */});
+  audio.play().catch(() => {});
 
   function removeUnlockListeners() {
-    window.removeEventListener('pointerdown', unlockAudio);
-    window.removeEventListener('keydown',   unlockAudio);
-    window.removeEventListener('touchstart',unlockAudio);
-    window.removeEventListener('touchmove', unlockAudio);
-    window.removeEventListener('wheel',     unlockAudio);
-    window.removeEventListener('scroll',    unlockAudio);
+    ['pointerdown','pointerup','keydown','touchstart','touchend','touchmove','wheel','scroll']
+      .forEach(ev => window.removeEventListener(ev, unlockAudio, { capture:false }));
   }
 
   function unlockAudio() {
@@ -147,27 +144,31 @@
     audio.play().catch(()=>{});
 
     clearInterval(fadeInterval);
-    const step = 0.05;
+    const step = 0.06;
     fadeInterval = setInterval(() => {
       audio.volume = Math.min(desiredVolume, (audio.volume || 0) + step);
       if (audio.volume >= desiredVolume) clearInterval(fadeInterval);
-    }, 100);
+    }, 90);
 
-    if (playBtn && pauseBtn) {
-      playBtn.style.display = 'none';
-      pauseBtn.style.display = 'flex';
-    }
+    if (playBtn && pauseBtn) { playBtn.style.display='none'; pauseBtn.style.display='flex'; }
 
     removeUnlockListeners();
   }
+  // сделаем доступной глобально (для кнопки-стрелки и других мест)
+  window.unlockAudio = unlockAudio;
 
-  // триггеры разблокировки
-  window.addEventListener('pointerdown', unlockAudio, { once: true, passive: true });
-  window.addEventListener('keydown',     unlockAudio, { once: true });
-  window.addEventListener('touchstart',  unlockAudio, { once: true, passive: true });
-  window.addEventListener('touchmove',   unlockAudio, { once: true, passive: true });
-  window.addEventListener('wheel',       unlockAudio, { once: true, passive: true });
-  window.addEventListener('scroll',      unlockAudio, { once: true, passive: true });
+  // больше жестов, которые точно считаются «взаимодействием»
+  window.addEventListener('pointerdown', unlockAudio, { once:true, passive:true });
+  window.addEventListener('pointerup',   unlockAudio, { once:true, passive:true });
+  window.addEventListener('keydown',     unlockAudio, { once:true });
+  window.addEventListener('touchstart',  unlockAudio, { once:true, passive:true });
+  window.addEventListener('touchend',    unlockAudio, { once:true, passive:true });
+  window.addEventListener('touchmove',   unlockAudio, { once:true, passive:true });
+  window.addEventListener('wheel',       unlockAudio, { once:true, passive:true });
+  window.addEventListener('scroll',      unlockAudio, { once:true, passive:true });
+
+  // … дальше ваш код play/pause/volume без изменений …
+})();
 
   // кнопки
   playBtn?.addEventListener('click', () => {
