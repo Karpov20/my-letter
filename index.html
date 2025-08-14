@@ -62,14 +62,14 @@
 <div class="card">
         <p>Я буду там, где мой путь. Не жду. Но помню.</p>
 </div>
-    </section>
-     <!-- Скрытое сообщение (должно быть ПОСЛЕ .letter, чтобы появлялось внизу) -->
+    <!-- Секрет, проявится когда дойдёшь до него -->
   <section id="secret" class="secret">
     <div class="secret-card">
       <p>Если ты дочитала до конца — знай: где бы ты ни была, тебя всегда ждут.</p>
     </div>
   </section>
-    <!-- Аудио и управление музыкой -->
+
+  <!-- Аудио + управление -->
   <audio id="background-music" preload="auto" autoplay muted playsinline>
     <source src="sol_seppy_enter_one.mp3" type="audio/mpeg" />
   </audio>
@@ -79,24 +79,13 @@
     <input id="volume-slider" class="volume-slider" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Громкость" />
   </div>
 
- <div class="fab-dock" id="fab-dock">
-  <button id="answers-fab" class="dock-btn">💬 Ответы</button>
-  <button id="memory-fab"  class="dock-btn">✍️ Оставить воспоминание</button>
-</div>
+  <!-- Док-панель -->
+  <div class="fab-dock" id="fab-dock">
+    <button id="answers-fab" class="dock-btn">💬 Ответы</button>
+    <button id="memory-fab"  class="dock-btn">✍️ Оставить воспоминание</button>
+  </div>
 
-<!-- Боковая панель с ответами -->
-<aside id="answers-panel" class="answers-panel" hidden>
-  <div class="answers-header">
-    <h3>Твои воспоминания</h3>
-    <button id="answers-close" class="btn btn-secondary">Закрыть</button>
-  </div>
-  <ul id="memories-list" class="memories-list"></ul>
-  <div class="answers-actions">
-    <button id="answers-clear" class="btn btn-secondary">Очистить всё</button>
-    <button id="answers-export" class="btn btn-primary">Экспорт .txt</button>
-  </div>
-</aside>
-    <!-- Модальное окно -->
+  <!-- Модалка -->
   <div id="memory-backdrop" class="memory-backdrop" hidden></div>
   <div id="memory-dialog" class="memory-dialog" role="dialog" aria-modal="true" aria-labelledby="memory-title" hidden>
     <div class="memory-card">
@@ -109,9 +98,15 @@
       </div>
     </div>
   </div>
-    <!-- Тост-уведомление -->
+
+  <!-- Тост -->
   <div id="toast" class="toast" role="status" aria-live="polite" hidden>Воспоминание сохранено</div>
 
-    <script src="script.js"></script>
+  <script>
+    // Если надумаешь подключать публичную гостевую (Google Sheets CSV),
+    // положи сюда URL опубликованного CSV:
+    window.PUBLIC_GUESTBOOK_CSV = ""; // пример: "https://docs.google.com/spreadsheets/d/e/.../pub?output=csv"
+  </script>
+  <script src="script.js"></script>
 </body>
 </html>
