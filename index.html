@@ -62,55 +62,48 @@
 <div class="card">
         <p>Я буду там, где мой путь. Не жду. Но помню.</p>
 </div>
-      <!-- Секрет, проявится когда дойдёшь до него -->
-  <section id="secret" class="secret">
-    <div class="secret-card">
-      <p>Если ты дочитала до конца — знай: где бы ты ни была, тебя всегда ждут.</p>
+     <!-- Секрет, проявится когда дойдёшь до него -->
+    <section id="secret" class="secret">
+      <div class="secret-card">
+        <p>Если ты дочитала до конца — знай: где бы ты ни была, тебя всегда ждут.</p>
+      </div>
+    </section>
+
+    <!-- Аудио + управление -->
+    <audio id="background-music" preload="auto" autoplay muted playsinline>
+      <source src="sol_seppy_enter_one.mp3" type="audio/mpeg" />
+    </audio>
+    <div id="music-controls" aria-label="Управление музыкой">
+      <button id="play-music" class="music-btn" aria-label="Воспроизвести">▶</button>
+      <button id="pause-music" class="music-btn" aria-label="Пауза" style="display:none;">⏸</button>
+      <input id="volume-slider" class="volume-slider" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Громкость" />
     </div>
-  </section>
 
-  <!-- Аудио + управление -->
-  <audio id="background-music" preload="auto" autoplay muted playsinline>
-    <source src="sol_seppy_enter_one.mp3" type="audio/mpeg" />
-  </audio>
-  <div id="music-controls" aria-label="Управление музыкой">
-    <button id="play-music" class="music-btn" aria-label="Воспроизвести">▶</button>
-    <button id="pause-music" class="music-btn" aria-label="Пауза" style="display:none;">⏸</button>
-    <input id="volume-slider" class="volume-slider" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Громкость" />
-  </div>
+    <!-- Док-панель -->
+    <div class="fab-dock" id="fab-dock">
+      <button id="memory-fab" class="dock-btn">✍️ Оставить воспоминание</button>
+    </div>
 
-  <!-- Док-панель -->
-  <div class="fab-dock" id="fab-dock">
-    <button id="answers-fab" class="dock-btn">💬 Ответы</button>
-    <button id="memory-fab"  class="dock-btn">✍️ Оставить воспоминание</button>
-  </div>
-
-  <!-- Модалка -->
-  <div id="memory-backdrop" class="memory-backdrop" hidden></div>
-  <div id="memory-dialog" class="memory-dialog" role="dialog" aria-modal="true" aria-labelledby="memory-title" hidden>
-    <div class="memory-card">
-      <h2 id="memory-title">Оставить воспоминание</h2>
-      <p class="memory-sub">Поделись коротким ответом или тёплой памятью. Она сохранится только у тебя на этом устройстве.</p>
-      <textarea id="memory-text" class="memory-text" rows="6" placeholder="Напиши здесь..."></textarea>
-      <div class="memory-actions">
-        <button id="memory-cancel" class="btn btn-secondary">Отмена</button>
-        <button id="memory-save" class="btn btn-primary">Сохранить</button>
+    <!-- Модалка -->
+    <div id="memory-backdrop" class="memory-backdrop" hidden></div>
+    <div id="memory-dialog" class="memory-dialog" role="dialog" aria-modal="true" aria-labelledby="memory-title" hidden>
+      <div class="memory-card">
+        <h2 id="memory-title">Оставить воспоминание</h2>
+        <p class="memory-sub">Поделись коротким ответом или тёплой памятью. Она сохранится только у тебя на этом устройстве.</p>
+        <textarea id="memory-text" class="memory-text" rows="6" placeholder="Напиши здесь..."></textarea>
+        <div class="memory-actions">
+          <button id="memory-cancel" class="btn btn-secondary">Отмена</button>
+          <button id="memory-save" class="btn btn-primary">Сохранить</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Тост -->
-  <div id="toast" class="toast" role="status" aria-live="polite" hidden>Воспоминание сохранено</div>
+    <!-- Тост -->
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden>Воспоминание сохранено</div>
 
-  <!-- Ответы из таблицы -->
-  <section id="guestbook" hidden class="guestbook">
-    <h2>Ответы других</h2>
-    <div id="guestbook-entries" class="guestbook-list"></div>
-  </section>
-
-  <script>
-    window.PUBLIC_GUESTBOOK_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnmT6oQkz1fQqqid83Ytudk0ODyUZtVaUwckzx_sucV-MPhVANDqN5TE4sX9PAuE-w1JLIa--RbgbQ/pub?output=csv";
-  </script>
-  <script src="script.js"></script>
+    <script>
+      window.PUBLIC_GUESTBOOK_CSV = null;
+    </script>
+    <script src="script.js"></script>
 </body>
 </html>
