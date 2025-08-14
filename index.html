@@ -62,7 +62,7 @@
 <div class="card">
         <p>Я буду там, где мой путь. Не жду. Но помню.</p>
 </div>
-    <!-- Секрет, проявится когда дойдёшь до него -->
+      <!-- Секрет, проявится когда дойдёшь до него -->
   <section id="secret" class="secret">
     <div class="secret-card">
       <p>Если ты дочитала до конца — знай: где бы ты ни была, тебя всегда ждут.</p>
@@ -101,12 +101,15 @@
 
   <!-- Тост -->
   <div id="toast" class="toast" role="status" aria-live="polite" hidden>Воспоминание сохранено</div>
-<section id="guestbook" hidden class="guestbook">
-  <h2>Ответы других</h2>
-  <div id="guestbook-entries" class="guestbook-list"></div>
-</section>
+
+  <!-- Ответы из таблицы -->
+  <section id="guestbook" hidden class="guestbook">
+    <h2>Ответы других</h2>
+    <div id="guestbook-entries" class="guestbook-list"></div>
+  </section>
+
   <script>
-    window.PUBLIC_GUESTBOOK_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnmT6oQkz1fQqqid83Ytudk0ODyUZtVaUwckzx_sucV-MPhVANDqN5TE4sX9PAuE-w1JLIa--RbgbQ/pub?output=csv"; // пример: "https://docs.google.com/spreadsheets/d/e/.../pub?output=csv"
+    window.PUBLIC_GUESTBOOK_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnmT6oQkz1fQqqid83Ytudk0ODyUZtVaUwckzx_sucV-MPhVANDqN5TE4sX9PAuE-w1JLIa--RbgbQ/pub?output=csv";
   </script>
   <script src="script.js"></script>
 </body>
