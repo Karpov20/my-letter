@@ -82,24 +82,51 @@ document.addEventListener('click', (e) => {
     document.body.appendChild(heart);
     setTimeout(() => heart.remove(), 2000);
 });
-// Добавьте в script.js
-// Элементы управления музыкой
+// === Музыка ===
 const audio = document.getElementById('background-music');
 const playBtn = document.getElementById('play-music');
 const pauseBtn = document.getElementById('pause-music');
 const volumeSlider = document.getElementById('volume-slider');
+const musicControls = document.getElementById('music-controls');
 
-// Автовоспроизведение с задержкой (для обхода ограничений браузеров)
-setTimeout(() => {
-  audio.volume = 0.3;
-  audio.play().catch(e => console.log("Автовоспроизведение не разрешено:", e));
-}, 2000);
+// стартуем без звука (см. muted в <audio>)
+audio.volume = 0;           // начнём с 0, потом плавно поднимем
+let desiredVolume = 0.3;    // целевая громкость
+let fadeInterval = null;
 
-// Обработчики кнопок
-playBtn.addEventListener('click', () => {
-  audio.play();
+// Пытаемся автоплейнуть сразу (часто получится на десктопе, т.к. muted)
+audio.play().catch(() => {
+  // нормально: на некоторых браузерах потребуется жест пользователя
+});
+
+// Разблокировка звука на первом взаимодействии пользователя
+function unlockAudio() {
+  // плавный fade-in
+  clearInterval(fadeInterval);
+  audio.muted = false;
+  const step = 0.03;              // шаг увеличения
+  fadeInterval = setInterval(() => {
+    audio.volume = Math.min(desiredVolume, audio.volume + step);
+    if (audio.volume >= desiredVolume) clearInterval(fadeInterval);
+  }, 100);
+
+  // если по каким-то причинам не играет — запустим
+  audio.play().catch(() => {});
   playBtn.style.display = 'none';
   pauseBtn.style.display = 'flex';
+
+  // Снимаем слушатели — одноразово
+  window.removeEventListener('pointerdown', unlockAudio);
+  window.removeEventListener('keydown', unlockAudio);
+}
+window.addEventListener('pointerdown', unlockAudio, { once: true });
+window.addEventListener('keydown', unlockAudio, { once: true });
+
+// Кнопки play/pause
+playBtn.addEventListener('click', () => {
+  audio.play().then(() => {
+    unlockAudio(); // также снимет mute и сделает fade-in
+  }).catch(() => {});
 });
 
 pauseBtn.addEventListener('click', () => {
@@ -108,23 +135,18 @@ pauseBtn.addEventListener('click', () => {
   playBtn.style.display = 'flex';
 });
 
-// Регулировка громкости
+// Ползунок громкости
 volumeSlider.addEventListener('input', () => {
-  audio.volume = volumeSlider.value;
+  desiredVolume = parseFloat(volumeSlider.value);
+  // если сейчас звучит — сразу меняем, иначе применится при следующем старте
+  if (!audio.muted && !audio.paused) {
+    audio.volume = desiredVolume;
+  }
 });
 
-// Индикатор проигрывания
+// Небольшой индикатор прогресса (опционально, если захочешь задействовать CSS-переменную)
 audio.addEventListener('timeupdate', () => {
-  const progress = (audio.currentTime / audio.duration) * 100;
+  const progress = (audio.currentTime / (audio.duration || 1)) * 100;
   document.documentElement.style.setProperty('--music-progress', `${progress}%`);
 });
 
-// Показ/скрытие элементов управления при наведении
-const musicControls = document.getElementById('music-controls');
-musicControls.addEventListener('mouseenter', () => {
-  musicControls.classList.add('expanded');
-});
-
-musicControls.addEventListener('mouseleave', () => {
-  musicControls.classList.remove('expanded');
-});
