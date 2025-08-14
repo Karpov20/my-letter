@@ -228,3 +228,39 @@
     });
   }).catch(()=>{ list.innerHTML = '<div class="entry">Не удалось загрузить гостевую ленту.</div>'; });
 })();
+
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwmauV2pqqNiGcKE_527aoDZvj6bJHYhYKJwEhI3XziF0HbmDrl9as07qt-nNlONbCq/exec';
+
+// Загрузка воспоминаний
+async function fetchMemories() {
+  try {
+    const res = await fetch(SHEET_URL);
+    const data = await res.json();
+    const list = document.getElementById('memory-list');
+    list.innerHTML = '';
+    data.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML = `<p>${item.text}</p>`;
+      list.appendChild(div);
+    });
+  } catch (e) {
+    console.error('Ошибка загрузки воспоминаний', e);
+  }
+}
+
+// Отправка воспоминания
+function saveMemory() {
+  const text = memoryText.value.trim();
+  if (!text) return;
+
+  fetch(SHEET_URL, {
+    method: 'POST',
+    body: JSON.stringify({ text })
+  })
+  .then(() => {
+    showToast('Сохранено!');
+    fetchMemories();
+    closeMemoryDialog();
+  });
+}
