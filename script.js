@@ -170,5 +170,94 @@ document.addEventListener('visibilitychange', () => {
     audio.play().catch(()=>{});
   }
 });
+// === Воспоминания: модалка и сохранение в localStorage ===
+const memoryFab = document.getElementById('memory-fab');
+const memoryBackdrop = document.getElementById('memory-backdrop');
+const memoryDialog = document.getElementById('memory-dialog');
+const memoryText = document.getElementById('memory-text');
+const memorySave = document.getElementById('memory-save');
+const memoryCancel = document.getElementById('memory-cancel');
+const toast = document.getElementById('toast');
+
+function openMemoryDialog() {
+  memoryBackdrop.hidden = false;
+  memoryDialog.hidden = false;
+  // задержка, чтобы анимации успели примениться
+  setTimeout(() => memoryText.focus(), 30);
+  // запрет прокрутки фона (опционально)
+  document.body.style.overflow = 'hidden';
+}
+function closeMemoryDialog() {
+  memoryBackdrop.hidden = true;
+  memoryDialog.hidden = true;
+  document.body.style.overflow = '';
+  memoryText.value = '';
+}
+
+function showToast(msg = 'Воспоминание сохранено') {
+  toast.textContent = msg;
+  toast.hidden = false;
+  // рендер тик
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => (toast.hidden = true), 200);
+    }, 1800);
+  });
+}
+
+function saveMemory() {
+  const text = (memoryText.value || '').trim();
+  if (!text) {
+    showToast('Пустое воспоминание не сохранено');
+    return;
+  }
+  const key = 'memories';
+  const current = JSON.parse(localStorage.getItem(key) || '[]');
+  current.push({ text, ts: Date.now() });
+  localStorage.setItem(key, JSON.stringify(current));
+  closeMemoryDialog();
+  showToast('Воспоминание сохранено');
+}
+
+memoryFab.addEventListener('click', openMemoryDialog);
+memoryBackdrop.addEventListener('click', closeMemoryDialog);
+memoryCancel.addEventListener('click', closeMemoryDialog);
+memorySave.addEventListener('click', saveMemory);
+document.addEventListener('keydown', (e) => {
+  if (!memoryDialog.hidden && e.key === 'Escape') closeMemoryDialog();
+  if (!memoryDialog.hidden && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'enter') saveMemory();
+});
+
+// === Секретное сообщение: показать при полной прокрутке ===
+const secret = document.getElementById('secret');
+let secretShown = false;
+function checkBottomReveal() {
+  if (secretShown) return;
+  const bottom = window.scrollY + window.innerHeight;
+  const docHeight = Math.max(
+    document.body.scrollHeight,
+    document.documentElement.scrollHeight
+  );
+  const threshold = 4; // пикселей от низа
+  if (bottom >= docHeight - threshold) {
+    secretShown = true;
+    // немного «драматургии» — задержка появления
+    setTimeout(() => secret.classList.add('visible'), 450);
+    // можно запомнить, что показывали
+    try { localStorage.setItem('secretShown', '1'); } catch {}
+  }
+}
+window.addEventListener('scroll', checkBottomReveal, { passive: true });
+window.addEventListener('resize', checkBottomReveal);
+document.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('secretShown') === '1') {
+    // если уже был показан ранее — можно показать сразу
+    secret.classList.add('visible');
+  } else {
+    checkBottomReveal();
+  }
+});
 
 
