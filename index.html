@@ -101,11 +101,14 @@
 
   <!-- Тост -->
   <div id="toast" class="toast" role="status" aria-live="polite" hidden>Воспоминание сохранено</div>
-
+<section id="guestbook" hidden>
+  <h2>Ответы других</h2>
+  <div id="guestbook-entries" class="guestbook-list"></div>
+</section>
   <script>
     // Если надумаешь подключать публичную гостевую (Google Sheets CSV),
     // положи сюда URL опубликованного CSV:
-    window.PUBLIC_GUESTBOOK_CSV = ""; // пример: "https://docs.google.com/spreadsheets/d/e/.../pub?output=csv"
+    window.PUBLIC_GUESTBOOK_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnmT6oQkz1fQqqid83Ytudk0ODyUZtVaUwckzx_sucV-MPhVANDqN5TE4sX9PAuE-w1JLIa--RbgbQ/pub?output=csv"; // пример: "https://docs.google.com/spreadsheets/d/e/.../pub?output=csv"
   </script>
   <script src="script.js"></script>
 </body>
