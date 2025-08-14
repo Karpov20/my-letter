@@ -1,3 +1,4 @@
+/* Обновлённый CSS без гостевой книги и с учётом отображения своих воспоминаний */
 @import url('https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto:wght@300;400&display=swap');
 
 html, body {
@@ -7,13 +8,11 @@ html, body {
   color: white;
 }
 
-/* Звёздное небо */
 #stars {
   position: fixed; inset: 0;
   z-index: -1; background: black;
 }
 
-/* Intro */
 .intro {
   min-height: 100vh; display: flex; flex-direction: column;
   justify-content: center; align-items: center; position: relative; text-align: center;
@@ -45,7 +44,6 @@ h1 {
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-/* Карточки */
 .letter {
   display: flex; flex-direction: column; gap: 20px;
   padding: 40px 20px; max-width: 900px; margin: auto;
@@ -63,7 +61,6 @@ h1 {
   .scroll-down { font-size: 2rem; bottom: 20px; }
 }
 
-/* Музыка */
 #music-controls {
   position: fixed; top: 20px; right: 20px; display: flex; align-items: center; gap: 15px; z-index: 1001;
 }
@@ -83,7 +80,6 @@ h1 {
   -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%; background: white; cursor: pointer;
 }
 
-/* Док-панель */
 .fab-dock{
   position: fixed;
   right: max(16px, env(safe-area-inset-right));
@@ -102,7 +98,6 @@ h1 {
 .dock-btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.28); }
 @media (max-width: 420px){ .fab-dock{ flex-direction: column; align-items: stretch; } }
 
-/* Модалка */
 .memory-backdrop {
   position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(2px);
   z-index: 1003; animation: fadeIn .2s ease forwards;
@@ -127,7 +122,6 @@ h1 {
 .btn-secondary { background: rgba(255,255,255,0.2); color: #fff; }
 .btn-secondary:hover { background: rgba(255,255,255,0.3); }
 
-/* Toast */
 .toast {
   position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(12px);
   background: rgba(255,255,255,0.92); color: #0b1220; padding: 10px 14px; border-radius: 12px;
@@ -136,7 +130,6 @@ h1 {
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* Секрет */
 .secret {
   max-width: 900px; margin: 40px auto 80px auto; padding: 0 20px;
   opacity: 0; transform: translateY(16px);
@@ -149,9 +142,6 @@ h1 {
   font-size: clamp(1.05rem, 2.4vw, 1.25rem); line-height: 1.6;
 }
 
-/* служебные */
 [hidden]{ display: none !important; }
-
-/* чтобы док не перекрывал низ */
 body { padding-bottom: 96px; }
 @media (max-width: 420px){ body { padding-bottom: 120px; } }
