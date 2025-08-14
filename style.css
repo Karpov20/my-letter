@@ -299,4 +299,36 @@ h1 {
 }
 .memories-list time{ opacity: .75; font-size: .85rem; }
 .answers-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:10px;}
+/* док-панель (замена двум плавающим кнопкам) */
+.fab-dock{
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 1002;
+  display: flex;
+  gap: 10px;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  padding: 8px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+.dock-btn{
+  padding: 10px 14px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform .15s ease, background .2s ease;
+  white-space: nowrap;
+}
+.dock-btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.28); }
+
+/* на очень узких экранах — вертикальная колонка */
+@media (max-width: 420px){
+  .fab-dock{ flex-direction: column; align-items: stretch; }
+}
+
 
