@@ -79,14 +79,10 @@
     <input id="volume-slider" class="volume-slider" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Громкость" />
   </div>
 
-  <!-- Плавающая кнопка "Оставить воспоминание" -->
-  <button id="memory-fab" class="memory-fab" aria-haspopup="dialog" aria-controls="memory-dialog">
-    ✍️ Оставить воспоминание
-  </button>
-  <!-- Плавающая кнопка "Ответы" -->
-<button id="answers-fab" class="memory-fab" style="right: 200px;">
-  💬 Ответы
-</button>
+ <div class="fab-dock" id="fab-dock">
+  <button id="answers-fab" class="dock-btn">💬 Ответы</button>
+  <button id="memory-fab"  class="dock-btn">✍️ Оставить воспоминание</button>
+</div>
 
 <!-- Боковая панель с ответами -->
 <aside id="answers-panel" class="answers-panel" hidden>
