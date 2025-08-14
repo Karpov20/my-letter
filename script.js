@@ -36,7 +36,7 @@
 // ===================== СЕРДЕЧКИ ПРИ КЛИКЕ ====================
 (() => {
   document.addEventListener('click', (e) => {
-    if (e.target.closest('#music-controls, .memory-dialog, #guestbook, .fab-dock')) return;
+    if (e.target.closest('#music-controls, .memory-dialog, #answers-panel, .fab-dock')) return;
     const heart = document.createElement('div');
     heart.textContent = '❤️'; heart.className = 'heart';
     heart.style.left = e.clientX + 'px'; heart.style.top = e.clientY + 'px';
@@ -124,6 +124,28 @@
   cancel?.addEventListener('click', close);
   save?.addEventListener('click', saveMem);
   document.addEventListener('keydown', e=>{ if (!dialog || dialog.hidden) return; if (e.key==='Escape') close(); if ((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='enter') saveMem(); });
+})();
+
+// ========== ПРОСМОТР СВОИХ ВОСПОМИНАНИЙ ==========
+(() => {
+  const answersBtn = document.getElementById('answers-fab');
+  const toast = document.getElementById('toast');
+  if (!answersBtn || !toast) return;
+
+  answersBtn.addEventListener('click', () => {
+    const memories = JSON.parse(localStorage.getItem('memories') || '[]');
+    if (!memories.length) {
+      toast.textContent = 'У тебя ещё нет воспоминаний';
+    } else {
+      toast.innerHTML = memories.map(m => `&bull; ${m.text}`).join('<br>');
+    }
+    toast.hidden = false;
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.hidden = true, 300);
+    }, 3000);
+  });
 })();
 
 // ====================== СЕКРЕТНОЕ СООБЩЕНИЕ =======================
