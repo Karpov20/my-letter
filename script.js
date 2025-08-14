@@ -126,32 +126,34 @@
   document.addEventListener('keydown', e=>{ if (!dialog || dialog.hidden) return; if (e.key==='Escape') close(); if ((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='enter') saveMem(); });
 })();
 
-// ========== ПРОСМОТР СВОИХ ВОСПОМИНАНИЙ ==========
-(() => {
-  const answersBtn = document.getElementById('answers-fab');
-  const toast = document.getElementById('toast');
-  if (!answersBtn || !toast) return;
-
-  answersBtn.addEventListener('click', () => {
-    const memories = JSON.parse(localStorage.getItem('memories') || '[]');
-    if (!memories.length) {
-      toast.textContent = 'У тебя ещё нет воспоминаний';
-    } else {
-      toast.innerHTML = memories.map(m => `&bull; ${m.text}`).join('<br>');
-    }
-    toast.hidden = false;
-    toast.classList.add('show');
-    setTimeout(() => {
-      toast.classList.remove('show');
-      setTimeout(() => toast.hidden = true, 300);
-    }, 3000);
-  });
-})();
-
 // ====================== СЕКРЕТНОЕ СООБЩЕНИЕ =======================
 (() => {
   const secret = document.getElementById('secret'); if (!secret) return;
   if (localStorage.getItem('secretShown') === '1'){ secret.classList.add('visible'); return; }
   const io = new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if (e.isIntersecting){ setTimeout(()=>secret.classList.add('visible'), 450); try{ localStorage.setItem('secretShown','1'); }catch{} io.disconnect(); } }); }, { threshold:0.6 });
   io.observe(secret);
+})();
+
+// ====================== ОТОБРАЗИТЬ СВОИ ВОСПОМИНАНИЯ =======================
+(() => {
+  const btn = document.getElementById('answers-fab');
+  const toast = document.getElementById('toast');
+  if (!btn || !toast) return;
+  btn.hidden = false;
+  btn.addEventListener('click', () => {
+    const arr = JSON.parse(localStorage.getItem('memories') || '[]');
+    if (!arr.length) {
+      toast.textContent = 'У тебя пока нет воспоминаний';
+    } else {
+      toast.textContent = arr.map(a => '• ' + a.text).join('\n');
+    }
+    toast.hidden = false;
+    requestAnimationFrame(() => {
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.hidden = true, 200);
+      }, 3000);
+    });
+  });
 })();
