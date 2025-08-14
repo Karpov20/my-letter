@@ -90,43 +90,43 @@ const volumeSlider = document.getElementById('volume-slider');
 const musicControls = document.getElementById('music-controls');
 
 // стартуем без звука (см. muted в <audio>)
-audio.volume = 0;           // начнём с 0, потом плавно поднимем
-let desiredVolume = 0.3;    // целевая громкость
+audio.volume = 0;           
+let desiredVolume = 0.7;    // ⬅️ целевая громкость ~70%
 let fadeInterval = null;
 
-// Пытаемся автоплейнуть сразу (часто получится на десктопе, т.к. muted)
-audio.play().catch(() => {
-  // нормально: на некоторых браузерах потребуется жест пользователя
-});
+// Пытаемся автоплейнуть сразу (muted-автоплей)
+audio.play().catch(() => {});
 
 // Разблокировка звука на первом взаимодействии пользователя
 function unlockAudio() {
-  // плавный fade-in
   clearInterval(fadeInterval);
   audio.muted = false;
-  const step = 0.03;              // шаг увеличения
+
+  // плавный fade‑in к desiredVolume
+  const step = 0.03;
   fadeInterval = setInterval(() => {
     audio.volume = Math.min(desiredVolume, audio.volume + step);
     if (audio.volume >= desiredVolume) clearInterval(fadeInterval);
   }, 100);
 
-  // если по каким-то причинам не играет — запустим
   audio.play().catch(() => {});
   playBtn.style.display = 'none';
   pauseBtn.style.display = 'flex';
 
-  // Снимаем слушатели — одноразово
+  // Снимаем одноразовые слушатели
   window.removeEventListener('pointerdown', unlockAudio);
   window.removeEventListener('keydown', unlockAudio);
+  window.removeEventListener('scroll', unlockAudio);
 }
+
+// Триггеры: клик/тап, клавиша, СКРОЛЛ
 window.addEventListener('pointerdown', unlockAudio, { once: true });
 window.addEventListener('keydown', unlockAudio, { once: true });
+window.addEventListener('scroll', unlockAudio, { once: true, passive: true });
 
 // Кнопки play/pause
 playBtn.addEventListener('click', () => {
-  audio.play().then(() => {
-    unlockAudio(); // также снимет mute и сделает fade-in
-  }).catch(() => {});
+  audio.play().then(unlockAudio).catch(() => {});
 });
 
 pauseBtn.addEventListener('click', () => {
@@ -138,15 +138,13 @@ pauseBtn.addEventListener('click', () => {
 // Ползунок громкости
 volumeSlider.addEventListener('input', () => {
   desiredVolume = parseFloat(volumeSlider.value);
-  // если сейчас звучит — сразу меняем, иначе применится при следующем старте
-  if (!audio.muted && !audio.paused) {
-    audio.volume = desiredVolume;
-  }
+  if (!audio.muted && !audio.paused) audio.volume = desiredVolume;
 });
 
-// Небольшой индикатор прогресса (опционально, если захочешь задействовать CSS-переменную)
+// Индикатор прогресса (опционально)
 audio.addEventListener('timeupdate', () => {
   const progress = (audio.currentTime / (audio.duration || 1)) * 100;
   document.documentElement.style.setProperty('--music-progress', `${progress}%`);
 });
+
 
