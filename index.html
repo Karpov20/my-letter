@@ -89,15 +89,27 @@
     <div id="memory-backdrop" class="memory-backdrop" hidden></div>
     <div id="memory-dialog" class="memory-dialog" role="dialog" aria-modal="true" aria-labelledby="memory-title" hidden>
       <div class="memory-card">
-        <h2 id="memory-title">Оставить воспоминание</h2>
-        <p class="memory-sub">Поделись коротким ответом или тёплой памятью. Она сохранится только у тебя на этом устройстве.</p>
-        <textarea id="memory-text" class="memory-text" rows="6" placeholder="Напиши здесь..."></textarea>
-        <div class="memory-actions">
-          <button id="memory-cancel" class="btn btn-secondary">Отмена</button>
-          <button id="memory-save" class="btn btn-primary">Сохранить</button>
-        </div>
-      </div>
+  <h2 id="memory-title">Оставить воспоминание</h2>
+  <p class="memory-sub">Поделись коротким ответом или тёплой памятью. Она сохранится только у тебя на этом устройстве.</p>
+
+  <!-- Режим: форма -->
+  <div id="memory-form">
+    <textarea id="memory-text" class="memory-text" rows="6" placeholder="Напиши здесь..."></textarea>
+    <div class="memory-actions">
+      <button id="memory-cancel" class="btn btn-secondary">Отмена</button>
+      <button id="memory-save" class="btn btn-primary">Сохранить</button>
     </div>
+  </div>
+
+  <!-- Режим: список ответов -->
+  <div id="memory-list" hidden>
+    <div id="memory-list-items" class="memory-list" role="list"></div>
+    <div class="memory-actions">
+      <button id="list-close" class="btn btn-secondary">Закрыть</button>
+      <button id="list-write" class="btn btn-primary">Написать ответ</button>
+    </div>
+  </div>
+</div>
 
     <!-- Тост -->
     <div id="toast" class="toast" role="status" aria-live="polite" hidden>Воспоминание сохранено</div>
