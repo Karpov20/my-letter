@@ -103,6 +103,7 @@
   const save = document.getElementById('memory-save');
   const cancel = document.getElementById('memory-cancel');
   const toast = document.getElementById('toast');
+  const answersBtn = document.getElementById('answers-fab');
 
   function open(){ if (!backdrop||!dialog) return; backdrop.hidden=false; dialog.hidden=false; setTimeout(()=>text?.focus(),30); document.body.style.overflow='hidden'; }
   function close(){ if (!backdrop||!dialog) return; backdrop.hidden=true; dialog.hidden=true; document.body.style.overflow=''; if (text) text.value=''; }
@@ -123,30 +124,19 @@
   backdrop?.addEventListener('click', close);
   cancel?.addEventListener('click', close);
   save?.addEventListener('click', saveMem);
-  document.addEventListener('keydown', e=>{ if (!dialog || dialog.hidden) return; if (e.key==='Escape') close(); if ((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='enter') saveMem(); });
+  document.addEventListener('keydown', e=>{ if (!dialog || dialog.hidden) return; if (e.key==='Escape') close(); if ((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='
+  // Кнопка «Ответы» — открываем модалку со списком
+  answersBtn?.addEventListener('click', () => {
+    const list = read()
+      .sort((a,b)=> (b.ts||0)-(a.ts||0))
+      .map(m => `• ${m.text}`)
+      .join('\n');
+    if (text) text.value = list || 'Ответов пока нет';
+    open();
+  });                                                                                                                   enter') saveMem(); });
 })();
 
-// ========== ПРОСМОТР СВОИХ ВОСПОМИНАНИЙ ==========
-(() => {
-  const answersBtn = document.getElementById('answers-fab');
-  const toast = document.getElementById('toast');
-  if (!answersBtn || !toast) return;
 
-  answersBtn.addEventListener('click', () => {
-    const memories = JSON.parse(localStorage.getItem('memories') || '[]');
-    if (!memories.length) {
-      toast.textContent = 'У тебя ещё нет воспоминаний';
-    } else {
-      toast.innerHTML = memories.map(m => `&bull; ${m.text}`).join('<br>');
-    }
-    toast.hidden = false;
-    toast.classList.add('show');
-    setTimeout(() => {
-      toast.classList.remove('show');
-      setTimeout(() => toast.hidden = true, 300);
-    }, 3000);
-  });
-})();
 
 // ====================== СЕКРЕТНОЕ СООБЩЕНИЕ =======================
 (() => {
