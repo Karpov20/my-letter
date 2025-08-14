@@ -94,189 +94,57 @@
   volume?.addEventListener('input', ()=>{ desired=parseFloat(volume.value); if (!audio.muted && !audio.paused) audio.volume = desired; });
 })();
 
-// ========== МОДАЛКА «Оставить воспоминание» + localStorage + Sheets + список ==========
+// ========== МОДАЛКА «Оставить воспоминание» + localStorage + Sheets ==========
 (() => {
   const fab = document.getElementById('memory-fab');
-  const answersFab = document.getElementById('answers-fab');
   const backdrop = document.getElementById('memory-backdrop');
   const dialog = document.getElementById('memory-dialog');
-
-
-
+  const text = document.getElementById('memory-text');
+  const save = document.getElementById('memory-save');
+  const cancel = document.getElementById('memory-cancel');
   const toast = document.getElementById('toast');
 
-  const title = document.getElementById('memory-title');
-  const sub   = document.querySelector('.memory-sub');
+  function open(){ if (!backdrop||!dialog) return; backdrop.hidden=false; dialog.hidden=false; setTimeout(()=>text?.focus(),30); document.body.style.overflow='hidden'; }
+  function close(){ if (!backdrop||!dialog) return; backdrop.hidden=true; dialog.hidden=true; document.body.style.overflow=''; if (text) text.value=''; }
+  function showToast(msg='Воспоминание сохранено'){ if (!toast) return; toast.textContent=msg; toast.hidden=false; requestAnimationFrame(()=>{ toast.classList.add('show'); setTimeout(()=>{ toast.classList.remove('show'); setTimeout(()=>toast.hidden=true,200); },1800); }); }
+  function read(){ try { return JSON.parse(localStorage.getItem('memories')||'[]'); } catch { return []; } }
+  function write(arr){ try { localStorage.setItem('memories', JSON.stringify(arr)); } catch {} }
 
-
-
-
-  // Режимы
-  const formWrap  = document.getElementById('memory-form');
-  const listWrap  = document.getElementById('memory-list');
-  const textarea  = document.getElementById('memory-text');
-  const listBox   = document.getElementById('memory-list-items');
-
-  const saveBtn   = document.getElementById('memory-save');
-  const cancelBtn = document.getElementById('memory-cancel');
-  const listClose = document.getElementById('list-close');
-  const listWrite = document.getElementById('list-write');
-
-  function showToast(msg='Воспоминание сохранено'){
-    if (!toast) return;
-    toast.textContent = msg;
-    toast.hidden = false;
-    requestAnimationFrame(() => {
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => (toast.hidden = true), 200);
-      }, 1800);
-    });
-  }
-
-  function readMem(){ try { return JSON.parse(localStorage.getItem('memories') || '[]'); } catch { return []; } }
-  function writeMem(arr){ try { localStorage.setItem('memories', JSON.stringify(arr)); } catch {} }
-
-  function openModal(){
-    backdrop.hidden = false; dialog.hidden = false; document.body.style.overflow='hidden';
-  }
-  function closeModal(){
-    backdrop.hidden = true; dialog.hidden = true; document.body.style.overflow=''; textarea.value='';
-    // очистить возможные data-new
-    listBox?.querySelectorAll('[data-new="1"]').forEach(el => el.removeAttribute('data-new'));
-  }
-
-  function setMode(mode){
-    const isForm = mode === 'form';
-    formWrap.hidden = !isForm;
-    listWrap.hidden =  isForm;
-
-    if (isForm){
-      title.textContent = 'Оставить воспоминание';
-      sub.textContent   = 'Поделись коротким ответом или тёплой памятью. Она сохранится только у тебя на этом устройстве.';
-      setTimeout(()=> textarea?.focus(), 30);
-    } else {
-      title.textContent = 'Твои воспоминания';
-      sub.textContent   = 'Здесь хранятся твои ответы на этом устройстве.';
-    }
-  }
-
-  // Рендер списка
-  function renderList(highlightId = null){
-    const data = readMem().sort((a,b)=> b.ts - a.ts);
-    listBox.innerHTML = '';
-    if (!data.length){
-      const empty = document.createElement('div');
-      empty.className = 'memory-item';
-      empty.innerHTML = '<div class="item-text">Ответов пока нет</div>';
-      listBox.appendChild(empty);
-      return;
-    }
-    for (const m of data){
-      const wrap = document.createElement('div');
-      wrap.className = 'memory-item';
-      wrap.setAttribute('role','listitem');
-      if (highlightId && m.id === highlightId) wrap.dataset.new = '1';
-
-      const text = document.createElement('div');
-      text.className = 'item-text';
-      text.textContent = m.text;
-
-      const meta = document.createElement('div');
-      meta.className = 'item-meta';
-
-      const time = document.createElement('div');
-      time.className = 'item-time';
-      const d = new Date(m.ts || 0);
-      time.textContent = d.toLocaleString([], { hour12:false });
-
-      const actions = document.createElement('div');
-      actions.className = 'item-actions';
-
-      const del = document.createElement('button');
-      del.className = 'item-btn';
-      del.type = 'button';
-      del.textContent = 'Удалить';
-      del.addEventListener('click', () => {
-        const arr = readMem().filter(x => (x.id || x.ts) !== (m.id || m.ts));
-        writeMem(arr);
-        renderList();
-      });
-
-      actions.appendChild(del);
-      meta.append(time, actions);
-      wrap.append(text, meta);
-      listBox.appendChild(wrap);
-    }
-
-    // Прокрутка к новому
-    if (highlightId){
-      const el = listBox.querySelector('[data-new="1"]');
-      el?.scrollIntoView({ block:'center', behavior:'smooth' });
-    }
-  }
-
-  // Открыть форму
-  function openForm(){
-    setMode('form');
-    openModal();
-  }
-
-  // Открыть список
-  function openList(highlightId = null){
-    setMode('list');
-    renderList(highlightId);
-    openModal();
-  }
-
-  // Сохранение
-  async function saveMem(){
-    const val = (textarea?.value || '').trim();
-    if (!val){ showToast('Пустое воспоминание не сохранено'); return; }
-
-    const id = Math.random().toString(36).slice(2);
-    const entry = { id, text: val, ts: Date.now() };
-
-    const arr = readMem();
-    arr.push(entry);
-    writeMem(arr);
-
-    // Не ждём сети — показываем сразу красиво
-    showToast('Воспоминание сохранено');
-    openList(id);
-
-    // Параллельно отправим в Apps Script (best-effort)
+  function saveMem(){
+    const val=(text?.value||'').trim(); if (!val){ showToast('Пустое воспоминание не сохранено'); return; }
+    const arr=read(); arr.push({ text:val, ts:Date.now() }); write(arr); close(); showToast('Воспоминание сохранено');
     fetch("https://script.google.com/macros/s/AKfycbwmauV2pqqNiGcKE_527aoDZvj6bJHYhYKJwEhI3XziF0HbmDrl9as07qt-nNlONbCq/exec", {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify({ text: val, ts: entry.ts, id })
+      method: 'POST', body: JSON.stringify({ text: val })
     }).catch(console.error);
   }
 
-  // Привязки
   document.addEventListener('DOMContentLoaded', ()=>{ if (backdrop) backdrop.hidden=true; if (dialog) dialog.hidden=true; document.body.style.overflow=''; });
+  fab?.addEventListener('click', open);
+  backdrop?.addEventListener('click', close);
+  cancel?.addEventListener('click', close);
+  save?.addEventListener('click', saveMem);
+  document.addEventListener('keydown', e=>{ if (!dialog || dialog.hidden) return; if (e.key==='Escape') close(); if ((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='enter') saveMem(); });
+})();
 
-  // Кнопки FAB
-  document.getElementById('memory-fab')?.addEventListener('click', openForm);
-  document.getElementById('answers-fab')?.addEventListener('click', ()=> openList());
+// ========== ПРОСМОТР СВОИХ ВОСПОМИНАНИЙ ==========
+(() => {
+  const answersBtn = document.getElementById('answers-fab');
+  const toast = document.getElementById('toast');
+  if (!answersBtn || !toast) return;
 
-  // Кнопки формы
-  saveBtn?.addEventListener('click', saveMem);
-  cancelBtn?.addEventListener('click', closeModal);
-
-  // Кнопки списка
-  listClose?.addEventListener('click', closeModal);
-  listWrite?.addEventListener('click', openForm);
-
-  // Закрытие по клику вне
-  backdrop?.addEventListener('click', closeModal);
-
-  // Горячие клавиши
-  document.addEventListener('keydown', e=>{
-    if (!dialog || dialog.hidden) return;
-    if (e.key === 'Escape') closeModal();
-    if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='enter' && !formWrap.hidden) saveMem();
+  answersBtn.addEventListener('click', () => {
+    const memories = JSON.parse(localStorage.getItem('memories') || '[]');
+    if (!memories.length) {
+      toast.textContent = 'У тебя ещё нет воспоминаний';
+    } else {
+      toast.innerHTML = memories.map(m => `&bull; ${m.text}`).join('<br>');
+    }
+    toast.hidden = false;
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.hidden = true, 300);
+    }, 3000);
   });
 })();
 
