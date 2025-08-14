@@ -127,3 +127,50 @@ h1 {
         bottom: 20px;
     }
 }
+/* Добавьте в style.css */
+#music-controls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  z-index: 1001;
+}
+
+.music-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2em;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s;
+}
+
+.music-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.volume-slider {
+  width: 100px;
+  -webkit-appearance: none;
+  height: 5px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.3);
+  outline: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+}
