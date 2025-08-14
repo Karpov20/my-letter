@@ -36,7 +36,7 @@
 // ===================== СЕРДЕЧКИ ПРИ КЛИКЕ ====================
 (() => {
   document.addEventListener('click', (e) => {
-    if (e.target.closest('#music-controls, .memory-dialog, #answers-panel, .fab-dock')) return;
+    if (e.target.closest('#music-controls, .memory-dialog, #guestbook, .fab-dock')) return;
     const heart = document.createElement('div');
     heart.textContent = '❤️'; heart.className = 'heart';
     heart.style.left = e.clientX + 'px'; heart.style.top = e.clientY + 'px';
