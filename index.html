@@ -83,6 +83,23 @@
   <button id="memory-fab" class="memory-fab" aria-haspopup="dialog" aria-controls="memory-dialog">
     ✍️ Оставить воспоминание
   </button>
+  <!-- Плавающая кнопка "Ответы" -->
+<button id="answers-fab" class="memory-fab" style="right: 200px;">
+  💬 Ответы
+</button>
+
+<!-- Боковая панель с ответами -->
+<aside id="answers-panel" class="answers-panel" hidden>
+  <div class="answers-header">
+    <h3>Твои воспоминания</h3>
+    <button id="answers-close" class="btn btn-secondary">Закрыть</button>
+  </div>
+  <ul id="memories-list" class="memories-list"></ul>
+  <div class="answers-actions">
+    <button id="answers-clear" class="btn btn-secondary">Очистить всё</button>
+    <button id="answers-export" class="btn btn-primary">Экспорт .txt</button>
+  </div>
+</aside>
     <!-- Модальное окно -->
   <div id="memory-backdrop" class="memory-backdrop" hidden></div>
   <div id="memory-dialog" class="memory-dialog" role="dialog" aria-modal="true" aria-labelledby="memory-title" hidden>
