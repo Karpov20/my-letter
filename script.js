@@ -240,13 +240,30 @@
     showToast('Воспоминание сохранено');
     openList(id);
 
-    // Параллельно отправим в Apps Script (best-effort)
-    fetch("https://script.google.com/macros/s/AKfycbwmauV2pqqNiGcKE_527aoDZvj6bJHYhYKJwEhI3XziF0HbmDrl9as07qt-nNlONbCq/exec", {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify({ text: val, ts: entry.ts, id })
-    }).catch(console.error);
-  }
+    // Параллельно отправим в Apps Script (без префлайта, URL-encoded)
+const url = "https://script.google.com/macros/s/AKfycbwmauV2pqqNiGcKE_527aoDZvj6bJHYhYKJwEhI3XziF0HbmDrl9as07qt-nNlONbCq/exec";
+const body = new URLSearchParams({
+  text: val,
+  ts: String(entry.ts),
+  id
+});
+
+fetch(url, {
+  method: 'POST',
+  // НЕ ставим кастомные заголовки — так не будет preflight
+  body
+})
+.then(async (r) => {
+  // опционально: простая проверка успешности
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  // если скрипт возвращает текст/JSON — можно прочитать:
+  // const data = await r.text(); console.log('GAS OK:', data);
+})
+.catch((err) => {
+  console.error('GAS error:', err);
+  // можно подсказать пользователю, что ушло только локально:
+  // showToast('Сохранено локально. Сеть недоступна?');
+});
 
   // Привязки
   document.addEventListener('DOMContentLoaded', ()=>{ if (backdrop) backdrop.hidden=true; if (dialog) dialog.hidden=true; document.body.style.overflow=''; });
