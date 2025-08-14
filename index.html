@@ -62,7 +62,7 @@
 <div class="card">
         <p>Я буду там, где мой путь. Не жду. Но помню.</p>
 </div>
-     <!-- Секрет, проявится когда дойдёшь до него -->
+    <!-- Секрет, проявится когда дойдёшь до него -->
     <section id="secret" class="secret">
       <div class="secret-card">
         <p>Если ты дочитала до конца — знай: где бы ты ни была, тебя всегда ждут.</p>
@@ -81,7 +81,8 @@
 
     <!-- Док-панель -->
     <div class="fab-dock" id="fab-dock">
-      <button id="memory-fab" class="dock-btn">✍️ Оставить воспоминание</button>
+      <button id="answers-fab" class="dock-btn">💬 Ответы</button>
+      <button id="memory-fab"  class="dock-btn">✍️ Оставить воспоминание</button>
     </div>
 
     <!-- Модалка -->
@@ -101,8 +102,14 @@
     <!-- Тост -->
     <div id="toast" class="toast" role="status" aria-live="polite" hidden>Воспоминание сохранено</div>
 
+    <!-- Ответы пользователя -->
+    <section id="user-answers" class="guestbook" hidden>
+      <h2>Твои воспоминания</h2>
+      <div id="user-entries"></div>
+    </section>
+
     <script>
-      window.PUBLIC_GUESTBOOK_CSV = null;
+      window.PUBLIC_GUESTBOOK_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnmT6oQkz1fQqqid83Ytudk0ODyUZtVaUwckzx_sucV-MPhVANDqN5TE4sX9PAuE-w1JLIa--RbgbQ/pub?output=csv";
     </script>
     <script src="script.js"></script>
 </body>
