@@ -82,51 +82,74 @@ document.addEventListener('click', (e) => {
     document.body.appendChild(heart);
     setTimeout(() => heart.remove(), 2000);
 });
-// === Музыка ===
+// === Музыка (универсальный мобильный + десктоп) ===
 const audio = document.getElementById('background-music');
 const playBtn = document.getElementById('play-music');
 const pauseBtn = document.getElementById('pause-music');
 const volumeSlider = document.getElementById('volume-slider');
-const musicControls = document.getElementById('music-controls');
 
-// стартуем без звука (см. muted в <audio>)
-audio.volume = 0;           
-let desiredVolume = 0.7;    // ⬅️ целевая громкость ~70%
+let desiredVolume = 0.7;     // целевая громкость ~70%
 let fadeInterval = null;
+let unlocked = false;
 
-// Пытаемся автоплейнуть сразу (muted-автоплей)
-audio.play().catch(() => {});
+// стартуем без звука — это единственный разрешённый автоплей
+audio.volume = 0;
+audio.muted = true;
+audio.play().catch(() => {/* нормально: ждём жест */});
 
-// Разблокировка звука на первом взаимодействии пользователя
+// универсальная разблокировка (снимет mute, поднимет громкость, запустит play)
 function unlockAudio() {
-  clearInterval(fadeInterval);
-  audio.muted = false;
+  if (unlocked) return;
+  unlocked = true;
 
-  // плавный fade‑in к desiredVolume
-  const step = 0.03;
+  // снимаем mute и запускаем (если остановлен)
+  audio.muted = false;
+  audio.play().catch(() => {/* если пользователь сразу нажал паузу — ок */});
+
+  // плавный подъём громкости до desiredVolume
+  clearInterval(fadeInterval);
+  const step = 0.05;  // чем больше, тем быстрее набирает звук
   fadeInterval = setInterval(() => {
-    audio.volume = Math.min(desiredVolume, audio.volume + step);
+    audio.volume = Math.min(desiredVolume, (audio.volume || 0) + step);
     if (audio.volume >= desiredVolume) clearInterval(fadeInterval);
   }, 100);
 
-  audio.play().catch(() => {});
+  // обновляем UI
   playBtn.style.display = 'none';
   pauseBtn.style.display = 'flex';
 
-  // Снимаем одноразовые слушатели
-  window.removeEventListener('pointerdown', unlockAudio);
-  window.removeEventListener('keydown', unlockAudio);
-  window.removeEventListener('scroll', unlockAudio);
+  // снимаем все одноразовые слушатели
+  removeUnlockListeners();
 }
 
-// Триггеры: клик/тап, клавиша, СКРОЛЛ
-window.addEventListener('pointerdown', unlockAudio, { once: true });
-window.addEventListener('keydown', unlockAudio, { once: true });
-window.addEventListener('scroll', unlockAudio, { once: true, passive: true });
+function addUnlockListeners() {
+  // pointerdown покрывает мышь и большинство тачей; на iOS добавим touch*
+  window.addEventListener('pointerdown', unlockAudio, { once: true, passive: true });
+  window.addEventListener('keydown', unlockAudio, { once: true });
+  // для мобилок: первый тап/движение пальцем/прокрутка колесом
+  window.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
+  window.addEventListener('touchmove', unlockAudio, { once: true, passive: true });
+  // некоторые браузеры засчитывают wheel/scroll как жест
+  window.addEventListener('wheel', unlockAudio, { once: true, passive: true });
+  window.addEventListener('scroll', unlockAudio, { once: true, passive: true });
+}
+
+function removeUnlockListeners() {
+  window.removeEventListener('pointerdown', unlockAudio, { passive: true });
+  window.removeEventListener('keydown', unlockAudio);
+  window.removeEventListener('touchstart', unlockAudio, { passive: true });
+  window.removeEventListener('touchmove', unlockAudio, { passive: true });
+  window.removeEventListener('wheel', unlockAudio, { passive: true });
+  window.removeEventListener('scroll', unlockAudio, { passive: true });
+}
+
+addUnlockListeners();
 
 // Кнопки play/pause
 playBtn.addEventListener('click', () => {
-  audio.play().then(unlockAudio).catch(() => {});
+  desiredVolume = parseFloat(volumeSlider.value || '0.7');
+  unlockAudio(); // снимет mute и поднимет громкость
+  audio.play().catch(()=>{});
 });
 
 pauseBtn.addEventListener('click', () => {
@@ -141,10 +164,11 @@ volumeSlider.addEventListener('input', () => {
   if (!audio.muted && !audio.paused) audio.volume = desiredVolume;
 });
 
-// Индикатор прогресса (опционально)
-audio.addEventListener('timeupdate', () => {
-  const progress = (audio.currentTime / (audio.duration || 1)) * 100;
-  document.documentElement.style.setProperty('--music-progress', `${progress}%`);
+// На некоторых устройствах вкладка могла «уснуть» — при возврате попробуем продолжить
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && unlocked && audio.paused) {
+    audio.play().catch(()=>{});
+  }
 });
 
 
