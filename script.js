@@ -82,3 +82,49 @@ document.addEventListener('click', (e) => {
     document.body.appendChild(heart);
     setTimeout(() => heart.remove(), 2000);
 });
+// Добавьте в script.js
+// Элементы управления музыкой
+const audio = document.getElementById('background-music');
+const playBtn = document.getElementById('play-music');
+const pauseBtn = document.getElementById('pause-music');
+const volumeSlider = document.getElementById('volume-slider');
+
+// Автовоспроизведение с задержкой (для обхода ограничений браузеров)
+setTimeout(() => {
+  audio.volume = 0.3;
+  audio.play().catch(e => console.log("Автовоспроизведение не разрешено:", e));
+}, 2000);
+
+// Обработчики кнопок
+playBtn.addEventListener('click', () => {
+  audio.play();
+  playBtn.style.display = 'none';
+  pauseBtn.style.display = 'flex';
+});
+
+pauseBtn.addEventListener('click', () => {
+  audio.pause();
+  pauseBtn.style.display = 'none';
+  playBtn.style.display = 'flex';
+});
+
+// Регулировка громкости
+volumeSlider.addEventListener('input', () => {
+  audio.volume = volumeSlider.value;
+});
+
+// Индикатор проигрывания
+audio.addEventListener('timeupdate', () => {
+  const progress = (audio.currentTime / audio.duration) * 100;
+  document.documentElement.style.setProperty('--music-progress', `${progress}%`);
+});
+
+// Показ/скрытие элементов управления при наведении
+const musicControls = document.getElementById('music-controls');
+musicControls.addEventListener('mouseenter', () => {
+  musicControls.classList.add('expanded');
+});
+
+musicControls.addEventListener('mouseleave', () => {
+  musicControls.classList.remove('expanded');
+});
