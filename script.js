@@ -33,7 +33,27 @@
   addEventListener('scroll', ()=>{ btn.style.display = scrollY>50 ? 'none' : 'block'; }, { passive:true });
 })();
 
-// =================== МУЗЫКА (скролл + разблокировка) ===================
+// ===================== СЕРДЕЧКИ ПРИ КЛИКЕ ====================
+(() => {
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#music-controls, .memory-dialog, #answers-panel, .fab-dock')) return;
+    const heart = document.createElement('div');
+    heart.textContent = '❤️'; heart.className = 'heart';
+    heart.style.left = e.clientX + 'px'; heart.style.top = e.clientY + 'px';
+    heart.style.position = 'absolute'; heart.style.pointerEvents = 'none';
+    heart.style.transform = 'translate(-50%, -50%) scale(1)';
+    heart.style.transition = 'transform 1.5s ease-out, opacity 1.5s ease-out';
+    heart.style.opacity = '1';
+    document.body.appendChild(heart);
+    requestAnimationFrame(() => {
+      heart.style.transform = 'translate(-50%, -50%) scale(2)';
+      heart.style.opacity = '0';
+    });
+    setTimeout(() => heart.remove(), 1600);
+  });
+})();
+
+// =================== МУЗЫКА (автозапуск при скролле) =================
 (() => {
   const audio = document.getElementById('background-music');
   const playBtn = document.getElementById('play-music');
@@ -65,59 +85,16 @@
   }
   window.unlockAudio = unlockAudio;
 
-  ['pointerdown','pointerup','keydown','touchstart','touchend','touchmove','wheel','scroll']
-    .forEach(ev=> addEventListener(ev, unlockAudio, { once:true, passive:true }));
+  addEventListener('scroll', unlockAudio, { once:true, passive:true });
+  addEventListener('pointerdown', unlockAudio, { once:true, passive:true });
+  addEventListener('touchstart', unlockAudio, { once:true, passive:true });
 
   playBtn?.addEventListener('click', ()=>{ desired=parseFloat(volume?.value||'0.7'); unlockAudio(); audio.play().catch(()=>{}); });
   pauseBtn?.addEventListener('click', ()=>{ audio.pause(); if (playBtn&&pauseBtn){ pauseBtn.style.display='none'; playBtn.style.display='flex'; } });
   volume?.addEventListener('input', ()=>{ desired=parseFloat(volume.value); if (!audio.muted && !audio.paused) audio.volume = desired; });
-
-  document.addEventListener('visibilitychange', ()=>{ if (!document.hidden && unlocked && audio.paused) audio.play().catch(()=>{}); });
 })();
 
-// =================== СЕКРЕТНОЕ СООБЩЕНИЕ ===================
-(() => {
-  const secret = document.getElementById('secret'); if (!secret) return;
-  if (localStorage.getItem('secretShown') === '1'){ secret.classList.add('visible'); return; }
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if (e.isIntersecting){
-        setTimeout(()=>secret.classList.add('visible'), 450);
-        try{ localStorage.setItem('secretShown','1'); }catch{}
-        io.disconnect();
-      }
-    });
-  }, { threshold:0.6 });
-  io.observe(secret);
-})();
-
-// ================== ГОСТЕВАЯ ИЗ GOOGLE SHEETS (CSV) ==================
-(() => {
-  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnmT6oQkz1fQqqid83Ytudk0ODyUZtVaUwckzx_sucV-MPhVANDqN5TE4sX9PAuE-w1JLIa--RbgbQ/pub?output=csv";
-  const wrap = document.getElementById('guestbook');
-  const list = document.getElementById('guestbook-entries');
-  if (!url || !wrap || !list) return;
-
-  wrap.hidden = false;
-
-  fetch(url).then(r=>r.text()).then(csv=>{
-    const rows = csv.trim().split(/\r?\n/).map(line=>line.split(',').map(c=>c.trim()));
-    const head = rows.shift() || [];
-    const iTime = head.findIndex(h=>/time|время|timestamp/i.test(h));
-    const iText = head.findIndex(h=>/text|сообщ|message|ответ/i.test(h));
-    list.innerHTML='';
-    rows.reverse().forEach(r=>{
-      const when = iTime>-1 ? r[iTime] : '';
-      const msg  = iText>-1 ? r[iText] : r.join(' – ');
-      const div = document.createElement('div');
-      div.className='entry';
-      div.innerHTML = `<time>${when}</time><p>${msg}</p>`;
-      list.appendChild(div);
-    });
-  }).catch(()=>{ list.innerHTML = '<div class="entry">Не удалось загрузить гостевую ленту.</div>'; });
-})();
-
-// ============== ФОРМА «Оставить воспоминание» ===============
+// ========== МОДАЛКА «Оставить воспоминание» + localStorage + Sheets ==========
 (() => {
   const fab = document.getElementById('memory-fab');
   const backdrop = document.getElementById('memory-backdrop');
@@ -127,30 +104,32 @@
   const cancel = document.getElementById('memory-cancel');
   const toast = document.getElementById('toast');
 
-  const SHEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmauV2pqqNiGcKE_527aoDZvj6bJHYhYKJwEhI3XziF0HbmDrl9as07qt-nNlONbCq/exec";
+  function open(){ if (!backdrop||!dialog) return; backdrop.hidden=false; dialog.hidden=false; setTimeout(()=>text?.focus(),30); document.body.style.overflow='hidden'; }
+  function close(){ if (!backdrop||!dialog) return; backdrop.hidden=true; dialog.hidden=true; document.body.style.overflow=''; if (text) text.value=''; }
+  function showToast(msg='Воспоминание сохранено'){ if (!toast) return; toast.textContent=msg; toast.hidden=false; requestAnimationFrame(()=>{ toast.classList.add('show'); setTimeout(()=>{ toast.classList.remove('show'); setTimeout(()=>toast.hidden=true,200); },1800); }); }
+  function read(){ try { return JSON.parse(localStorage.getItem('memories')||'[]'); } catch { return []; } }
+  function write(arr){ try { localStorage.setItem('memories', JSON.stringify(arr)); } catch {} }
 
-  function open(){ backdrop.hidden=false; dialog.hidden=false; setTimeout(()=>text?.focus(),30); document.body.style.overflow='hidden'; }
-  function close(){ backdrop.hidden=true; dialog.hidden=true; document.body.style.overflow=''; text.value=''; }
-  function showToast(msg='Воспоминание сохранено'){ toast.textContent=msg; toast.hidden=false; requestAnimationFrame(()=>{ toast.classList.add('show'); setTimeout(()=>{ toast.classList.remove('show'); setTimeout(()=>toast.hidden=true,200); },1800); }); }
-
-  function saveMemory(){
-    const message = (text?.value || '').trim();
-    if (!message) return showToast('Пустое воспоминание не сохранено');
-
-    fetch(SHEET_SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ text: message })
-    }).then(()=>{
-      showToast('Сохранено!');
-      close();
-    }).catch(()=>{
-      showToast('Ошибка отправки');
-    });
+  function saveMem(){
+    const val=(text?.value||'').trim(); if (!val){ showToast('Пустое воспоминание не сохранено'); return; }
+    const arr=read(); arr.push({ text:val, ts:Date.now() }); write(arr); close(); showToast('Воспоминание сохранено');
+    fetch("https://script.google.com/macros/s/AKfycbwmauV2pqqNiGcKE_527aoDZvj6bJHYhYKJwEhI3XziF0HbmDrl9as07qt-nNlONbCq/exec", {
+      method: 'POST', body: JSON.stringify({ text: val })
+    }).catch(console.error);
   }
 
+  document.addEventListener('DOMContentLoaded', ()=>{ if (backdrop) backdrop.hidden=true; if (dialog) dialog.hidden=true; document.body.style.overflow=''; });
   fab?.addEventListener('click', open);
   backdrop?.addEventListener('click', close);
   cancel?.addEventListener('click', close);
-  save?.addEventListener('click', saveMemory);
-  document.addEventListener('keydown', e=>{ if (!dialog || dialog.hidden) return; if (e.key==='Escape') close(); if ((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='enter') saveMemory(); });
+  save?.addEventListener('click', saveMem);
+  document.addEventListener('keydown', e=>{ if (!dialog || dialog.hidden) return; if (e.key==='Escape') close(); if ((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='enter') saveMem(); });
+})();
+
+// ====================== СЕКРЕТНОЕ СООБЩЕНИЕ =======================
+(() => {
+  const secret = document.getElementById('secret'); if (!secret) return;
+  if (localStorage.getItem('secretShown') === '1'){ secret.classList.add('visible'); return; }
+  const io = new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if (e.isIntersecting){ setTimeout(()=>secret.classList.add('visible'), 450); try{ localStorage.setItem('secretShown','1'); }catch{} io.disconnect(); } }); }, { threshold:0.6 });
+  io.observe(secret);
 })();
