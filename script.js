@@ -97,6 +97,7 @@
 // ========== МОДАЛКА «Оставить воспоминание» + localStorage + Sheets ==========
 (() => {
   const fab = document.getElementById('memory-fab');
+  const answersFab = document.getElementById('answers-fab');
   const backdrop = document.getElementById('memory-backdrop');
   const dialog = document.getElementById('memory-dialog');
   const text = document.getElementById('memory-text');
@@ -118,8 +119,16 @@
     }).catch(console.error);
   }
 
+  function openAnswers(){
+    const answers = read();
+    const list = answers.map(m => `• ${m.text}`).join('\n');
+    text.value = list || 'Ответов пока нет';
+    open();
+  }
+
   document.addEventListener('DOMContentLoaded', ()=>{ if (backdrop) backdrop.hidden=true; if (dialog) dialog.hidden=true; document.body.style.overflow=''; });
   fab?.addEventListener('click', open);
+  answersFab?.addEventListener('click', openAnswers);
   backdrop?.addEventListener('click', close);
   cancel?.addEventListener('click', close);
   save?.addEventListener('click', saveMem);
@@ -132,28 +141,4 @@
   if (localStorage.getItem('secretShown') === '1'){ secret.classList.add('visible'); return; }
   const io = new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if (e.isIntersecting){ setTimeout(()=>secret.classList.add('visible'), 450); try{ localStorage.setItem('secretShown','1'); }catch{} io.disconnect(); } }); }, { threshold:0.6 });
   io.observe(secret);
-})();
-
-// ====================== ОТОБРАЗИТЬ СВОИ ВОСПОМИНАНИЯ =======================
-(() => {
-  const btn = document.getElementById('answers-fab');
-  const toast = document.getElementById('toast');
-  if (!btn || !toast) return;
-  btn.hidden = false;
-  btn.addEventListener('click', () => {
-    const arr = JSON.parse(localStorage.getItem('memories') || '[]');
-    if (!arr.length) {
-      toast.textContent = 'У тебя пока нет воспоминаний';
-    } else {
-      toast.textContent = arr.map(a => '• ' + a.text).join('\n');
-    }
-    toast.hidden = false;
-    requestAnimationFrame(() => {
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.hidden = true, 200);
-      }, 3000);
-    });
-  });
 })();
