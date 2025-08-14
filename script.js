@@ -136,7 +136,27 @@
   });                                                                                                                   enter') saveMem(); });
 })();
 
+// ========== ПРОСМОТР СВОИХ ВОСПОМИНАНИЙ ==========
+(() => {
+  const answersBtn = document.getElementById('answers-fab');
+  const toast = document.getElementById('toast');
+  if (!answersBtn || !toast) return;
 
+  answersBtn.addEventListener('click', () => {
+    const memories = JSON.parse(localStorage.getItem('memories') || '[]');
+    if (!memories.length) {
+      toast.textContent = 'У тебя ещё нет воспоминаний';
+    } else {
+      toast.innerHTML = memories.map(m => `&bull; ${m.text}`).join('<br>');
+    }
+    toast.hidden = false;
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.hidden = true, 300);
+    }, 3000);
+  });
+})();
 
 // ====================== СЕКРЕТНОЕ СООБЩЕНИЕ =======================
 (() => {
