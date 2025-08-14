@@ -15,6 +15,34 @@
   <input id="volume-slider" class="volume-slider" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Громкость">
 </div>
 </head>
+    <!-- Плавающая кнопка "Оставить воспоминание" -->
+<button id="memory-fab" class="memory-fab" aria-haspopup="dialog" aria-controls="memory-dialog">
+  ✍️ Оставить воспоминание
+</button>
+
+<!-- Модальное окно -->
+<div id="memory-backdrop" class="memory-backdrop" hidden></div>
+<div id="memory-dialog" class="memory-dialog" role="dialog" aria-modal="true" aria-labelledby="memory-title" hidden>
+  <div class="memory-card">
+    <h2 id="memory-title">Оставить воспоминание</h2>
+    <p class="memory-sub">Поделись коротким ответом или тёплой памятью. Она сохранится только у тебя на этом устройстве.</p>
+    <textarea id="memory-text" class="memory-text" rows="6" placeholder="Напиши здесь..."></textarea>
+    <div class="memory-actions">
+      <button id="memory-cancel" class="btn btn-secondary">Отмена</button>
+      <button id="memory-save" class="btn btn-primary">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Тост уведомление -->
+<div id="toast" class="toast" role="status" aria-live="polite" hidden>Воспоминание сохранено</div>
+
+<!-- Скрытое сообщение (появляется при полной прокрутке) -->
+<section id="secret" class="secret">
+  <div class="secret-card">
+    <p>Если ты дочитала до конца — знай: где бы ты ни была, тебя всегда ждут.</p>
+  </div>
+</section>
 <body>
     <canvas id="stars"></canvas>
 
