@@ -281,3 +281,22 @@ h1 {
 }
 /* Служебное: доверяем атрибуту hidden */
 [hidden] { display: none !important; }
+
+/* Панель ответов */
+.answers-panel{
+  position: fixed; top: 0; right: 0; height: 100vh; width: min(420px, 92vw);
+  background: rgba(0,0,0,0.8); color: #fff; z-index: 1006;
+  backdrop-filter: blur(8px);
+  padding: 16px; box-shadow: -10px 0 30px rgba(0,0,0,0.4);
+  transform: translateX(100%); transition: transform .25s ease;
+}
+.answers-panel.open{ transform: translateX(0); }
+.answers-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.memories-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; overflow:auto; max-height: calc(100vh - 150px);}
+.memories-list li{
+  background: rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 12px;
+  display:flex; flex-direction:column; gap:6px;
+}
+.memories-list time{ opacity: .75; font-size: .85rem; }
+.answers-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:10px;}
+
